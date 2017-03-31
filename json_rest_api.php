@@ -68,39 +68,15 @@ function do_rest_api() {
 	// the data structure we will be returning via JSON
 	$ret = array();
 	
-	// If there's a search, return it instead of albums
+	// If the system in the context of a search
 	if ($_zp_current_search) {
-		$ret['thumb_size'] = (int) getOption('thumb_size');
-		
-		$_zp_current_search->setSortType('date');
-		$_zp_current_search->setSortDirection('DESC');
-		
-		// add search results that are images
-		$imageResults = array();
-		$images = $_zp_current_search->getImages();
-		foreach ($images as $image) {
-			$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
-			$imageObject = $_zp_current_search->getImage($imageIndex);
-			$imageResults[] = to_image($imageObject);
-		}
-		if ($imageResults) {
-			$ret['images'] = $imageResults;
-		}
-		
-		// add search results that are albums
-		$albumResults = array();
-		while (next_album()) {
-			$albumResults[] = to_album_thumb($_zp_current_album);
-		}
-		if ($albumResults) {
-			$ret['albums'] = $albumResults;
-		}
+		$ret['search'] = to_search($_zp_current_search);
 	}
-	// Else if the system in the context of an image. Return info about the image.
+	// Else if the system in the context of an image
 	else if ($_zp_current_image) {
 		$ret['image'] = to_image($_zp_current_image);
 	}
-	// Else if the system is in the context of an album. Return info about the album.
+	// Else if the system is in the context of an album
 	else if ($_zp_current_album) {
 		// handle 404 not found
 		if (!$_zp_current_album->exists) {
@@ -136,6 +112,42 @@ function do_rest_api() {
 	// Return the results to the client in JSON format
 	print(json_encode($ret));
 	exitZP();
+}
+
+/**
+ * Return array containing search results.  Uses the SearchEngine defined in $_zp_current_search.
+ * 
+ * @return JSON-ready array
+ */
+function to_search() {
+	global $_zp_current_album, $_zp_current_image, $_zp_current_search;
+	$ret['thumb_size'] = (int) getOption('thumb_size');
+	
+	$_zp_current_search->setSortType('date');
+	$_zp_current_search->setSortDirection('DESC');
+	
+	// add search results that are images
+	$imageResults = array();
+	$images = $_zp_current_search->getImages();
+	foreach ($images as $image) {
+		$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
+		$imageObject = $_zp_current_search->getImage($imageIndex);
+		$imageResults[] = to_image($imageObject);
+	}
+	if ($imageResults) {
+		$ret['images'] = $imageResults;
+	}
+	
+	// add search results that are albums
+	$albumResults = array();
+	while (next_album()) {
+		$albumResults[] = to_album_thumb($_zp_current_album);
+	}
+	if ($albumResults) {
+		$ret['albums'] = $albumResults;
+	}
+
+	return $ret;
 }
 
 /**
