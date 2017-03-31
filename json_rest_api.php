@@ -84,7 +84,7 @@ function do_rest_api() {
 	// Else if the system is in the context of an album
 	else if ($_zp_current_album) {
 		if (!$_zp_current_album->exists) {
-			$ret = to_404("Album $_zp_current_album->name does not exist.");
+			$ret = to_404("Album does not exist.");
 		}
 		else {
 			$ret['album'] = to_album($_zp_current_album);
