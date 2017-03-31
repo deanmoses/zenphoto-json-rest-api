@@ -90,7 +90,7 @@ function do_rest_api() {
 			$ret['album'] = to_album($_zp_current_album);
 		}
 	}
-	// Else if no current search, image or album, return info about the root albums of the site
+	// Else there's no current search, image or album. Return info about the root albums of the site
 	else {
 		$ret['image_size'] = (int) getOption('image_size');
 		$ret['thumb_size'] = (int) getOption('thumb_size');
@@ -207,7 +207,14 @@ function to_album($album) {
 	$albums = array();
 	foreach ($album->getAlbums() as $folder) {
 		$subalbum = newAlbum($folder);
-		$albums[] = to_album($subalbum);
+		// If the client asked for a deep tree, return all subalbums and descendants
+		if ($_GET['json'] === 'deep') {
+			$albums[] = to_album($subalbum);
+		}
+		// Else return shallow: just the thumbnail info of immediate child albums
+		else {
+			$albums[] = to_album_thumb($subalbum);
+		}
 	}
 	if ($albums) {
 		$ret['albums'] = $albums;
