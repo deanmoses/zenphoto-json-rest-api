@@ -5,12 +5,12 @@ A JSON REST API plugin for Zenphoto.  Useful for building mobile apps and javasc
 
 This is read-only.  It cannot create or modify albums or images.
 
-##Installation:##
+## Installation
 Place the plugin file within /plugins and enable it
 
-##Usage:##
+## Usage
 Add "json" as a query string parameter to your URLs to get a JSON representation of the album or search results instead of the normal HTML response.
 
 Examples:
-http://mysite.com/myAlbum/?json returns myAlbum in JSON format
-http://mysite.com/page/search/train?json returns search results in JSON format
+* http://mysite.com/myAlbum/?json returns myAlbum in JSON format
+* http://mysite.com/page/search/train?json returns search results in JSON format
