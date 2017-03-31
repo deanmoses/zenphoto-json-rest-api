@@ -102,6 +102,7 @@ function do_rest_api() {
 	}
 	// Else if the system is in the context of an album. Return info about the album.
 	else if ($_zp_current_album) {
+		// handle 404 not found
 		if (!$_zp_current_album->exists) {
 			http_response_code(404);
 			$ret['error'] = true;
@@ -110,6 +111,7 @@ function do_rest_api() {
 			print(json_encode($ret));
 			exitZP();
 		}
+
 		$ret['path'] = $_zp_current_album->name;
 		$ret['title'] = $_zp_current_album->getTitle();
 		if ($_zp_current_album->getCustomData()) $ret['summary'] = $_zp_current_album->getCustomData();
@@ -138,7 +140,7 @@ function do_rest_api() {
 	
 		// Add info about this albums' images
 		$images = array();
-		while (next_image()):
+		while (next_image(true /*disable pagination, get all images*/)):
 			$images[] = to_image($_zp_current_image);
 		endwhile;
 		if ($images) {
