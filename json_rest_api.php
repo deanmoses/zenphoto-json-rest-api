@@ -98,13 +98,21 @@ function do_rest_api() {
 		// Get the top-level albums
 	   	$subAlbumNames = $_zp_gallery->getAlbums();
 		if (is_array($subAlbumNames)) {
-			$subAlbums = array();
+			$albums = array();
 			foreach ($subAlbumNames as $subAlbumName) {
-				$subAlbum = new Album($subAlbumName, $_zp_gallery);
-				$subAlbums[] = to_album_thumb($subAlbum);
+				$subalbum = new Album($subAlbumName, $_zp_gallery);
+
+				// If the client asked for a deep tree, return all subalbums and descendants
+				if ($_GET['json'] === 'deep') {
+					$albums[] = to_album($subalbum);
+				}
+				// Else return shallow: just the thumbnail info of immediate child albums
+				else {
+					$albums[] = to_album_thumb($subalbum);
+				}
 			}
-			if ($subAlbums) {
-				$ret['albums'] = $subAlbums;
+			if ($albums) {
+				$ret['albums'] = $albums;
 			}
 		}
 	}
