@@ -20,14 +20,15 @@ $plugin_URL = 'https://github.com/deanmoses/zenphoto-json-rest-api';
 // Handle REST API calls before anything else
 // This is necessary because it sets response headers that are different from Zenphoto's normal ones  
 if (!OFFSET_PATH && isset($_GET['json'])) {
-	zp_register_filter('load_theme_script', 'do_rest_api', 9999);
+	zp_register_filter('load_theme_script', 'rest_api_execute', 9999);
 }
 
 /**
  * Respond to the request with JSON rather than the normal HTML
  */
-function do_rest_api() {
-	global $_zp_gallery, $_zp_current_album, $_zp_current_image, $_zp_albums,$_zp_current_search,$_zp_current_context;
+function rest_api_execute() {
+	global $_zp_gallery, $_zp_current_album, $_zp_current_image, $_zp_current_search;
+
 	header('Content-type: application/json; charset=UTF-8');
 
 	// If the request is coming from a subdomain, send the headers
@@ -70,30 +71,30 @@ function do_rest_api() {
 	
 	// If system is in the context of a search
 	if ($_zp_current_search) {
-		$ret['search'] = to_search($_zp_current_search);
+		$ret['search'] = rest_api_search($_zp_current_search);
 	}
 	// Else if system is in the context of an image
 	else if ($_zp_current_image) {
 		if (!$_zp_current_image->exists) {
-			$ret = to_404("Image does not exist.");
+			$ret = rest_api_404("Image does not exist.");
 		}
 		else {
-			$ret['image'] = to_image($_zp_current_image);
+			$ret['image'] = rest_api_image($_zp_current_image);
 		}
 	}
 	// Else if system is in the context of an album
 	else if ($_zp_current_album) {
 		if (!$_zp_current_album->exists) {
-			$ret = to_404("Album does not exist.");
+			$ret = rest_api_404("Album does not exist.");
 		}
 		else {
-			$ret['album'] = to_album($_zp_current_album);
+			$ret['album'] = rest_api_album($_zp_current_album);
 		}
 	}
 	// Else there's no current search, image or album
 	// Return info about the root albums of the site
 	else {
-		$ret['gallery'] = to_gallery($_zp_gallery);
+		$ret['gallery'] = rest_api_gallery($_zp_gallery);
 	}
 	
 	// Return the results to the client in JSON format
@@ -107,9 +108,12 @@ function do_rest_api() {
  * @param Gallery $gallery
  * @return JSON-ready array
  */
-function to_gallery($gallery) {
+function rest_api_gallery($gallery) {
 	// the data structure we will be returning
 	$ret = array();
+
+	if ($gallery->getTitle()) $ret['title'] = $gallery->getTitle();
+	if ($gallery->getDesc()) $ret['description'] = $gallery->getDesc();
 
 	$ret['image_size'] = (int) getOption('image_size');
 	$ret['thumb_size'] = (int) getOption('thumb_size');
@@ -123,11 +127,11 @@ function to_gallery($gallery) {
 
 			// If the client asked for a deep tree, return all subalbums and descendants
 			if ($_GET['json'] === 'deep') {
-				$albums[] = to_album($subalbum);
+				$albums[] = rest_api_album($subalbum);
 			}
 			// Else return shallow: just the thumbnail info of immediate child albums
 			else {
-				$albums[] = to_album_thumb($subalbum);
+				$albums[] = rest_api_album_thumb($subalbum);
 			}
 		}
 		if ($albums) {
@@ -144,17 +148,18 @@ function to_gallery($gallery) {
  * @param Album $album
  * @return JSON-ready array
  */
-function to_album($album) {
+function rest_api_album($album) {
 	global $_zp_current_image;
 
 	// the data structure we will be returning
 	$ret = array();
 
 	$ret['path'] = $album->name;
-	$ret['title'] = $album->getTitle();
-	$ret['date'] = to_timestamp($album->getDateTime());
-	if ($album->getCustomData()) $ret['custom_data'] = $album->getCustomData();
+	
+	$ret['date'] = rest_api_timestamp($album->getDateTime());
+	if ($album->getTitle()) $ret['title'] = $album->getTitle();
 	if ($album->getDesc()) $ret['description'] = $album->getDesc();
+	if ($album->getCustomData()) $ret['custom_data'] = $album->getCustomData();
 	if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
 	$ret['image_size'] = (int) getOption('image_size');
 	$ret['thumb_size'] = (int) getOption('thumb_size');
@@ -175,11 +180,11 @@ function to_album($album) {
 		$subalbum = newAlbum($folder);
 		// If the client asked for a deep tree, return all subalbums and descendants
 		if ($_GET['json'] === 'deep') {
-			$albums[] = to_album($subalbum);
+			$albums[] = rest_api_album($subalbum);
 		}
 		// Else return shallow: just the thumbnail info of immediate child albums
 		else {
-			$albums[] = to_album_thumb($subalbum);
+			$albums[] = rest_api_album_thumb($subalbum);
 		}
 	}
 	if ($albums) {
@@ -190,26 +195,26 @@ function to_album($album) {
 	$images = array();
 	foreach ($album->getImages() as $filename) {
 		$image = newImage($album, $filename);
-		$images[] = to_image($image);
+		$images[] = rest_api_image($image);
 	}
 	if ($images) {
 		$ret['images'] = $images;
 	}
 	
 	// Add info about parent album
-	$parentAlbum = to_related_album($album->getParent());
+	$parentAlbum = rest_api_related_album($album->getParent());
 	if ($parentAlbum) {
 		$ret['parent_album'] = $parentAlbum; // would like to use 'parent' but that's a reserved word in javascript
 	}
 	
 	// Add info about next album
-	$nextAlbum = to_related_album($album->getNextAlbum());
+	$nextAlbum = rest_api_related_album($album->getNextAlbum());
 	if ($nextAlbum) {
 		$ret['next'] = $nextAlbum;
 	}
 	
 	// Add info about prev album
-	$prevAlbum = to_related_album($album->getPrevAlbum());
+	$prevAlbum = rest_api_related_album($album->getPrevAlbum());
 	if ($prevAlbum) {
 		$ret['prev'] = $prevAlbum;
 	}
@@ -223,12 +228,12 @@ function to_album($album) {
  * @param Album $album
  * @return JSON-ready array
  */
-function to_related_album($album) {
+function rest_api_related_album($album) {
 	if ($album) {
 		$ret = array();
 		$ret['path'] = $album->name;
-		$ret['title'] = $album->getTitle();
-		$ret['date'] = to_timestamp($album->getDateTime());
+		$ret['date'] = rest_api_timestamp($album->getDateTime());
+		if ($album->getTitle()) $ret['title'] = $album->getTitle();
 		return $ret;
 	}
 	return;
@@ -240,11 +245,11 @@ function to_related_album($album) {
  * @param Album $album
  * @return JSON-ready array
  */
-function to_album_thumb($album) {
+function rest_api_album_thumb($album) {
 	$ret = array();
 	$ret['path'] = $album->name;
-	$ret['title'] = $album->getTitle();
-	$ret['date'] = to_timestamp($album->getDateTime());
+	$ret['date'] = rest_api_timestamp($album->getDateTime());
+	if ($album->getTitle()) $ret['title'] = $album->getTitle();
 	if ($album->getCustomData()) $ret['custom_data'] = $album->getCustomData();
 	if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
 	$thumbImage = $album->getAlbumThumbImage();
@@ -261,13 +266,13 @@ function to_album_thumb($album) {
  * @param Album $album
  * @return JSON-ready array
  */
-function to_image($image) {
+function rest_api_image($image) {
 	$ret = array();
 	// strip /zenphoto/albums/ so that the path starts something like myAlbum/...
 	$ret['path'] = str_replace(ALBUMFOLDER, '', $image->getFullImage());
-	$ret['title'] = $image->getTitle();
-	$ret['date'] = to_timestamp($image->getDateTime());
-	$ret['description'] = $image->getDesc();
+	$ret['date'] = rest_api_timestamp($image->getDateTime());
+	if ($image->getTitle()) $ret['title'] = $image->getTitle();
+	if ($image->getDesc()) $ret['description'] = $image->getDesc();
 	$ret['url_full'] = $image->getFullImageURL();
 	$ret['url_sized'] = $image->getSizedImage(getOption('image_size'));
 	$ret['url_thumb'] = $image->getThumb();
@@ -281,7 +286,7 @@ function to_image($image) {
  * 
  * @return JSON-ready array
  */
-function to_search() {
+function rest_api_search() {
 	global $_zp_current_album, $_zp_current_image, $_zp_current_search;
 
 	// the data structure we will be returning
@@ -298,7 +303,7 @@ function to_search() {
 	foreach ($images as $image) {
 		$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
 		$imageObject = $_zp_current_search->getImage($imageIndex);
-		$imageResults[] = to_image($imageObject);
+		$imageResults[] = rest_api_image($imageObject);
 	}
 	if ($imageResults) {
 		$ret['images'] = $imageResults;
@@ -307,7 +312,7 @@ function to_search() {
 	// add search results that are albums
 	$albumResults = array();
 	while (next_album()) {
-		$albumResults[] = to_album_thumb($_zp_current_album);
+		$albumResults[] = rest_api_album_thumb($_zp_current_album);
 	}
 	if ($albumResults) {
 		$ret['albums'] = $albumResults;
@@ -322,7 +327,7 @@ function to_search() {
  * @param string $error_message
  * @return JSON-ready array
  */
-function to_404($error_message) {
+function rest_api_404($error_message) {
 	http_response_code(404);
 	$ret = array();
 	$ret['error'] = true;
@@ -340,7 +345,7 @@ function to_404($error_message) {
  * @param string $dateString
  * @return integer
  */
-function to_timestamp($dateString) {
+function rest_api_timestamp($dateString) {
 	$a = strptime($dateString, '%Y-%m-%d %H:%M:%S'); //format:  2014-11-24 01:40:22
 	return (int) mktime($a['tm_hour'], $a['tm_min'], $a['tm_sec'], $a['tm_mon']+1, $a['tm_mday'], $a['tm_year']+1900);
 }
