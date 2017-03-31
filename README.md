@@ -1,7 +1,9 @@
 zenphoto-json-rest-api
 =================================
 
-A Zenphoto plugin that provides a JSON REST API to albums and searches. Useful for building mobile apps and javascript-heavy web apps on top of Zenphoto.
+A Zenphoto plugin that provides a JSON REST API to albums and searches. 
+
+It's useful for building mobile apps and javascript-heavy web apps on top of Zenphoto.
 
 The API is read-only.  It cannot create or modify albums or images.
 
