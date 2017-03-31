@@ -13,7 +13,7 @@ The API is read-only.  It cannot create or modify albums or images.
     
 ## Usage
 * Add "`json`" as a query string parameter to your gallery URLs to get a JSON representation of the album or search results instead of the normal HTML.   
-* Add "`json=deep`" to return information about all descendant albums.  Otherwise it will only thumbnail info of immediate child albums.  This has no effect on image or album URLs.
+* Add "`json=deep`" to return information about all descendant albums.  Otherwise it only includes immediate child albums.  This has no effect on image or album URLs.
 
 Examples:
 * `http://mysite.com/myAlbum/?json` returns info about myAlbum and its immediate children
