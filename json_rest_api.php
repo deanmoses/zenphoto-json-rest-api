@@ -63,7 +63,7 @@ function do_rest_api() {
 	// with the appropriate Access-Control-Allow-Origin header set.
 	header('Vary: Origin', false /* Allow for multiple Vary headers because other things could be adding a Vary as well. */);
 
-	$_zp_gallery_page = 'rest_api.php';
+	$_zp_gallery_page = 'json_rest_api.php';
 
 	// the data structure we will be returning via JSON
 	$ret = array();
