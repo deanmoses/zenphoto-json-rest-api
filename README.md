@@ -9,7 +9,7 @@ The API is read-only.  It cannot create or modify albums or images.
 
 ## Installation
 1. Place `json_rest_api.php` in the `/plugins` folder of your Zenphoto installation
-2. Activate the plugin from the Zenphoto administration panel, under the *Plugins* tab
+2. Activate the plugin from your Zenphoto administration panel, under the *Plugins* tab
     
 ## Usage
 Use your normal gallery URLs but add a query string parameter named "`json`" to get a JSON representation.  This works for albums, images and search results.   
