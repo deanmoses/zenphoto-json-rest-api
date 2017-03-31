@@ -17,7 +17,7 @@ Add "`json`" as a query string parameter to your gallery URLs to get a JSON repr
 
 Examples:
 * `http://mysite.com/myAlbum/?json` returns myAlbum in JSON format
-* `http://mysite.com/page/search/train?json` returns search results in JSON format
+* `http://mysite.com/page/search/train/?json` returns search results in JSON format
 
 ## Cross-domain AJAX
 For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
