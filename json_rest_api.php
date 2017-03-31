@@ -115,61 +115,6 @@ function do_rest_api() {
 }
 
 /**
- * Return array with 404 Not Found information
- * 
- * @param string $error_message
- * @return JSON-ready array
- */
-function to_404($error_message) {
-	http_response_code(404);
-	$ret = array();
-	$ret['error'] = true;
-	$ret['status'] = 404;
-	$ret['message'] = $error_message;
-	return $ret;
-}
-
-/**
- * Return array containing search results.  Uses the SearchEngine defined in $_zp_current_search.
- * 
- * @return JSON-ready array
- */
-function to_search() {
-	global $_zp_current_album, $_zp_current_image, $_zp_current_search;
-
-	// the data structure we will be returning
-	$ret = array();
-
-	$ret['thumb_size'] = (int) getOption('thumb_size');
-	
-	$_zp_current_search->setSortType('date');
-	$_zp_current_search->setSortDirection('DESC');
-	
-	// add search results that are images
-	$imageResults = array();
-	$images = $_zp_current_search->getImages();
-	foreach ($images as $image) {
-		$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
-		$imageObject = $_zp_current_search->getImage($imageIndex);
-		$imageResults[] = to_image($imageObject);
-	}
-	if ($imageResults) {
-		$ret['images'] = $imageResults;
-	}
-	
-	// add search results that are albums
-	$albumResults = array();
-	while (next_album()) {
-		$albumResults[] = to_album_thumb($_zp_current_album);
-	}
-	if ($albumResults) {
-		$ret['albums'] = $albumResults;
-	}
-
-	return $ret;
-}
-
-/**
  * Return array containing full album.
  * 
  * @param Album $album
@@ -310,7 +255,61 @@ function to_image($image) {
 	return $ret;
 }
 
-// 
+/**
+ * Return array containing search results.  Uses the SearchEngine defined in $_zp_current_search.
+ * 
+ * @return JSON-ready array
+ */
+function to_search() {
+	global $_zp_current_album, $_zp_current_image, $_zp_current_search;
+
+	// the data structure we will be returning
+	$ret = array();
+
+	$ret['thumb_size'] = (int) getOption('thumb_size');
+	
+	$_zp_current_search->setSortType('date');
+	$_zp_current_search->setSortDirection('DESC');
+	
+	// add search results that are images
+	$imageResults = array();
+	$images = $_zp_current_search->getImages();
+	foreach ($images as $image) {
+		$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
+		$imageObject = $_zp_current_search->getImage($imageIndex);
+		$imageResults[] = to_image($imageObject);
+	}
+	if ($imageResults) {
+		$ret['images'] = $imageResults;
+	}
+	
+	// add search results that are albums
+	$albumResults = array();
+	while (next_album()) {
+		$albumResults[] = to_album_thumb($_zp_current_album);
+	}
+	if ($albumResults) {
+		$ret['albums'] = $albumResults;
+	}
+
+	return $ret;
+}
+
+/**
+ * Return array with 404 Not Found information
+ * 
+ * @param string $error_message
+ * @return JSON-ready array
+ */
+function to_404($error_message) {
+	http_response_code(404);
+	$ret = array();
+	$ret['error'] = true;
+	$ret['status'] = 404;
+	$ret['message'] = $error_message;
+	return $ret;
+}
+
 /**
  * Take a zenphoto date string and turn it into an integer timestamp of 
  * seconds since the epoch.  Javascript uses milliseconds since the 
