@@ -65,14 +65,14 @@ function do_rest_api() {
 
 	$_zp_gallery_page = 'json_rest_api.php';
 
-	// the data structure we will be returning via JSON
+	// the data structure we will return via JSON
 	$ret = array();
 	
-	// If the system in the context of a search
+	// If system is in the context of a search
 	if ($_zp_current_search) {
 		$ret['search'] = to_search($_zp_current_search);
 	}
-	// Else if the system in the context of an image
+	// Else if system is in the context of an image
 	else if ($_zp_current_image) {
 		if (!$_zp_current_image->exists) {
 			$ret = to_404("Image does not exist.");
@@ -81,7 +81,7 @@ function do_rest_api() {
 			$ret['image'] = to_image($_zp_current_image);
 		}
 	}
-	// Else if the system is in the context of an album
+	// Else if system is in the context of an album
 	else if ($_zp_current_album) {
 		if (!$_zp_current_album->exists) {
 			$ret = to_404("Album does not exist.");
@@ -90,36 +90,52 @@ function do_rest_api() {
 			$ret['album'] = to_album($_zp_current_album);
 		}
 	}
-	// Else there's no current search, image or album. Return info about the root albums of the site
+	// Else there's no current search, image or album
+	// Return info about the root albums of the site
 	else {
-		$ret['image_size'] = (int) getOption('image_size');
-		$ret['thumb_size'] = (int) getOption('thumb_size');
-
-		// Get the top-level albums
-	   	$subAlbumNames = $_zp_gallery->getAlbums();
-		if (is_array($subAlbumNames)) {
-			$albums = array();
-			foreach ($subAlbumNames as $subAlbumName) {
-				$subalbum = new Album($subAlbumName, $_zp_gallery);
-
-				// If the client asked for a deep tree, return all subalbums and descendants
-				if ($_GET['json'] === 'deep') {
-					$albums[] = to_album($subalbum);
-				}
-				// Else return shallow: just the thumbnail info of immediate child albums
-				else {
-					$albums[] = to_album_thumb($subalbum);
-				}
-			}
-			if ($albums) {
-				$ret['albums'] = $albums;
-			}
-		}
+		$ret['gallery'] = to_gallery($_zp_gallery);
 	}
 	
 	// Return the results to the client in JSON format
 	print(json_encode($ret));
 	exitZP();
+}
+
+/**
+ * Return array containing the root albums of the gallery.
+ * 
+ * @param Gallery $gallery
+ * @return JSON-ready array
+ */
+function to_gallery($gallery) {
+	// the data structure we will be returning
+	$ret = array();
+
+	$ret['image_size'] = (int) getOption('image_size');
+	$ret['thumb_size'] = (int) getOption('thumb_size');
+
+	// Get the top-level albums
+   	$subAlbumNames = $gallery->getAlbums();
+	if (is_array($subAlbumNames)) {
+		$albums = array();
+		foreach ($subAlbumNames as $subAlbumName) {
+			$subalbum = new Album($subAlbumName, $gallery);
+
+			// If the client asked for a deep tree, return all subalbums and descendants
+			if ($_GET['json'] === 'deep') {
+				$albums[] = to_album($subalbum);
+			}
+			// Else return shallow: just the thumbnail info of immediate child albums
+			else {
+				$albums[] = to_album_thumb($subalbum);
+			}
+		}
+		if ($albums) {
+			$ret['albums'] = $albums;
+		}
+	}
+
+	return $ret;
 }
 
 /**
@@ -136,7 +152,8 @@ function to_album($album) {
 
 	$ret['path'] = $album->name;
 	$ret['title'] = $album->getTitle();
-	if ($album->getCustomData()) $ret['summary'] = $album->getCustomData();
+	$ret['date'] = to_timestamp($album->getDateTime());
+	if ($album->getCustomData()) $ret['custom_data'] = $album->getCustomData();
 	if ($album->getDesc()) $ret['description'] = $album->getDesc();
 	if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
 	$ret['image_size'] = (int) getOption('image_size');
@@ -152,10 +169,6 @@ function to_album($album) {
 		$ret['url_thumb'] = $album->getAlbumThumbImage()->getThumb();
 	}
 	
-	//format:  2014-11-24 01:40:22
-	$a = strptime($album->getDateTime(), '%Y-%m-%d %H:%M:%S');
-	$ret['date'] = mktime($a['tm_hour'], $a['tm_min'], $a['tm_sec'], $a['tm_mon']+1, $a['tm_mday'], $a['tm_year']+1900);
-
 	// Add info about this albums' subalbums
 	$albums = array();
 	foreach ($album->getAlbums() as $folder) {
@@ -232,7 +245,7 @@ function to_album_thumb($album) {
 	$ret['path'] = $album->name;
 	$ret['title'] = $album->getTitle();
 	$ret['date'] = to_timestamp($album->getDateTime());
-	if ($album->getCustomData()) $ret['summary'] = $album->getCustomData();
+	if ($album->getCustomData()) $ret['custom_data'] = $album->getCustomData();
 	if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
 	$thumbImage = $album->getAlbumThumbImage();
 	if ($thumbImage) {
