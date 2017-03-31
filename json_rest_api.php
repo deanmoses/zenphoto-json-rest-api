@@ -112,58 +112,7 @@ function do_rest_api() {
 			exitZP();
 		}
 
-		$ret['path'] = $_zp_current_album->name;
-		$ret['title'] = $_zp_current_album->getTitle();
-		if ($_zp_current_album->getCustomData()) $ret['summary'] = $_zp_current_album->getCustomData();
-		if ($_zp_current_album->getDesc()) $ret['description'] = $_zp_current_album->getDesc();
-		if (!(boolean) $_zp_current_album->getShow()) $ret['unpublished'] = true;
-		$ret['image_size'] = (int) getOption('image_size');
-		$ret['thumb_size'] = (int) getOption('thumb_size');
-		
-		$thumb_path = $_zp_current_album->get('thumb');
-		if (!is_numeric($thumb_path)) {
-			$ret['thumb'] = $thumb_path;
-		}
-		
-		//format:  2014-11-24 01:40:22
-		$a = strptime($_zp_current_album->getDateTime(), '%Y-%m-%d %H:%M:%S');
-		$ret['date'] = mktime($a['tm_hour'], $a['tm_min'], $a['tm_sec'], $a['tm_mon']+1, $a['tm_mday'], $a['tm_year']+1900);
-	
-		// Add info about this albums' subalbums
-		$albums = array();
-		while (next_album()):
-			$albums[] = to_album_thumb($_zp_current_album);
-		endwhile;
-		if ($albums) {
-			$ret['albums'] = $albums;
-		}
-	
-		// Add info about this albums' images
-		$images = array();
-		while (next_image(true /*disable pagination, get all images*/)):
-			$images[] = to_image($_zp_current_image);
-		endwhile;
-		if ($images) {
-			$ret['images'] = $images;
-		}
-		
-		// Add info about parent album
-		$parentAlbum = to_related_album($_zp_current_album->getParent());
-		if ($parentAlbum) {
-			$ret['parent_album'] = $parentAlbum; // would like to use 'parent' but that's a reserved word in javascript
-		}
-		
-		// Add info about next album
-		$nextAlbum = to_related_album($_zp_current_album->getNextAlbum());
-		if ($nextAlbum) {
-			$ret['next'] = $nextAlbum;
-		}
-		
-		// Add info about prev album
-		$prevAlbum = to_related_album($_zp_current_album->getPrevAlbum());
-		if ($prevAlbum) {
-			$ret['prev'] = $prevAlbum;
-		}
+		$ret['album'] = to_album($_zp_current_album);
 	}
 	// Else if no current search, image or album, return info about the root albums of the site
 	else {
@@ -187,6 +136,73 @@ function do_rest_api() {
 	// Return the results to the client in JSON format
 	print(json_encode($ret));
 	exitZP();
+}
+
+// return full album
+function to_album($album) {
+	global $_zp_current_image;
+	$ret = array();
+	$ret['path'] = $album->name;
+	$ret['title'] = $album->getTitle();
+	if ($album->getCustomData()) $ret['summary'] = $album->getCustomData();
+	if ($album->getDesc()) $ret['description'] = $album->getDesc();
+	if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
+	$ret['image_size'] = (int) getOption('image_size');
+	$ret['thumb_size'] = (int) getOption('thumb_size');
+	
+	$thumb_path = $album->get('thumb');
+	if (!is_numeric($thumb_path)) {
+		$ret['thumb'] = $thumb_path;
+	}
+
+	$thumbImage = $album->getAlbumThumbImage();
+	if ($thumbImage) {
+		$ret['urlThumb'] = $album->getAlbumThumbImage()->getThumb();
+	}
+	
+	//format:  2014-11-24 01:40:22
+	$a = strptime($album->getDateTime(), '%Y-%m-%d %H:%M:%S');
+	$ret['date'] = mktime($a['tm_hour'], $a['tm_min'], $a['tm_sec'], $a['tm_mon']+1, $a['tm_mday'], $a['tm_year']+1900);
+
+	// Add info about this albums' subalbums
+	$albums = array();
+	foreach ($album->getAlbums() as $folder) {
+		$subalbum = newAlbum($folder);
+		$albums[] = to_album($subalbum);
+	}
+	if ($albums) {
+		$ret['albums'] = $albums;
+	}
+
+	// Add info about this albums' images
+	$images = array();
+	foreach ($album->getImages() as $filename) {
+		$image = newImage($album, $filename);
+		$images[] = to_image($image);
+	}
+	if ($images) {
+		$ret['images'] = $images;
+	}
+	
+	// Add info about parent album
+	$parentAlbum = to_related_album($album->getParent());
+	if ($parentAlbum) {
+		$ret['parent_album'] = $parentAlbum; // would like to use 'parent' but that's a reserved word in javascript
+	}
+	
+	// Add info about next album
+	$nextAlbum = to_related_album($album->getNextAlbum());
+	if ($nextAlbum) {
+		$ret['next'] = $nextAlbum;
+	}
+	
+	// Add info about prev album
+	$prevAlbum = to_related_album($album->getPrevAlbum());
+	if ($prevAlbum) {
+		$ret['prev'] = $prevAlbum;
+	}
+
+	return $ret;
 }
 
 // just enough info about a parent / prev / next album to navigate to it
