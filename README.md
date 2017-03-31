@@ -16,10 +16,10 @@ The API is read-only.  It cannot create or modify albums or images.
 * Add "`json=deep`" to return information about all descendant albums.  Otherwise it only includes immediate child albums.  This has no effect on image or album URLs.
 
 Examples:
-* `http://mysite.com/myAlbum/?json` returns info about myAlbum and its immediate children
-* `http://mysite.com/myAlbum/?json=deep` returns info about myAlbum and all its descendants
-* `http://mysite.com/myAlbum/myImage.jpg?json` returns info about myImage.jpg
-* `http://mysite.com/page/search/train/?json` returns search results about 'train'
+* `http://mysite.com/myAlbum/?json` get JSON about myAlbum and its immediate children
+* `http://mysite.com/myAlbum/?json=deep` get JSON  about myAlbum and all its descendants
+* `http://mysite.com/myAlbum/myImage.jpg?json` get JSON about myImage.jpg
+* `http://mysite.com/page/search/train/?json` get JSON search results about 'train'
 
 ## Cross-domain AJAX
 For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
