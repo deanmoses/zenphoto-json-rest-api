@@ -23,4 +23,4 @@ Examples:
 * `http://mysite.com/page/search/train/?json` get JSON search results about 'train'
 
 ## Cross-domain AJAX
-For security it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
+For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
