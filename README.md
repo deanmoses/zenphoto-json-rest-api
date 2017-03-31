@@ -25,7 +25,7 @@ Examples:
 * `http://mysite.com/?json=deep` get JSON about the gallery itself and **EVERY ALBUM IN THE SYSTEM**
 
 ## Watch out for `json=deep`
-It can be very expensive to get a giant nested album structure.  I cannot call this on my own root gallery because it times out.  This is about 1000 albums and 25000 images.
+It can be very expensive to get a giant set of nested albums.  I cannot call this on my own root gallery because it times out.  This is about 1000 albums and 25000 images.
 
 ## Cross-domain AJAX
 For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
