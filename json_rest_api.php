@@ -15,9 +15,10 @@
  * @subpackage development
  */
 $plugin_is_filter = 900 | FEATURE_PLUGIN;
-$plugin_description = gettext('REST API for Zenphoto');
+$plugin_description = gettext('JSON REST API for Zenphoto');
 $plugin_author = "Dean Moses (deanmoses)";
 $plugin_version = '0.2.0';
+$plugin_URL = 'https://github.com/deanmoses/zenphoto-json-rest-api';
 
 // Handle REST API calls before anything else
 // This is necessary because it sets response headers that are different from Zenphoto's normal ones  
