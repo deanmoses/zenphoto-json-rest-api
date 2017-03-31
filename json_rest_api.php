@@ -196,7 +196,7 @@ function to_album($album) {
 
 	$thumbImage = $album->getAlbumThumbImage();
 	if ($thumbImage) {
-		$ret['urlThumb'] = $album->getAlbumThumbImage()->getThumb();
+		$ret['url_thumb'] = $album->getAlbumThumbImage()->getThumb();
 	}
 	
 	//format:  2014-11-24 01:40:22
@@ -276,7 +276,7 @@ function to_album_thumb($album) {
 	if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
 	$thumbImage = $album->getAlbumThumbImage();
 	if ($thumbImage) {
-		$ret['urlThumb'] = $album->getAlbumThumbImage()->getThumb();
+		$ret['url_thumb'] = $album->getAlbumThumbImage()->getThumb();
 	}
 	
 	return $ret;
@@ -295,9 +295,9 @@ function to_image($image) {
 	$ret['title'] = $image->getTitle();
 	$ret['date'] = to_timestamp($image->getDateTime());
 	$ret['description'] = $image->getDesc();
-	$ret['urlFull'] = $image->getFullImageURL();
-	$ret['urlSized'] = $image->getSizedImage(getOption('image_size'));
-	$ret['urlThumb'] = $image->getThumb();
+	$ret['url_full'] = $image->getFullImageURL();
+	$ret['url_sized'] = $image->getSizedImage(getOption('image_size'));
+	$ret['url_thumb'] = $image->getThumb();
 	$ret['width'] = (int) $image->getWidth();
 	$ret['height'] = (int) $image->getHeight();
 	return $ret;
