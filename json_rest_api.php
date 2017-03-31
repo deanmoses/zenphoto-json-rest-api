@@ -3,9 +3,8 @@
 /**
  * A JSON REST API for ZenPhoto.
  *
- * This filter looks for a query string parameter '?json' and
- * returns a JSON representation of the album or search results
- * instead of the normal HTML response.
+ * Looks for a query string parameter '?json' and returns a JSON representation 
+ * of the album or search results instead of the normal HTML response.
  *
  * @author Dean Moses (deanmoses)
  * @package plugins
@@ -26,7 +25,9 @@ if (!OFFSET_PATH && isset($_GET['json'])) {
 class jsonRestApi {
 
 	/**
-	 * Respond to the request with JSON rather than the normal HTML
+	 * Respond to the request with JSON rather than the normal HTML.
+	 *
+	 * This does not return; it exits Zenphoto.
 	 */
 	static function execute() {
 		global $_zp_gallery, $_zp_current_album, $_zp_current_image, $_zp_current_search;
@@ -105,7 +106,7 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Return array containing the root albums of the gallery.
+	 * Return array representing the gallery itself and the root albums.
 	 * 
 	 * @param Gallery $gallery
 	 * @return JSON-ready array
@@ -140,10 +141,10 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Return array containing full album.
+	 * Return array containing album.
 	 * 
 	 * @param Album $album
-	 * @param boolean $thumbOnly true: only get enough info to render this album's thumbnail
+	 * @param boolean $thumbOnly true: only return enough info to render this album's thumbnail
 	 * @return JSON-ready array
 	 */
 	static function getAlbumData($album, $thumbOnly = false) {
