@@ -236,8 +236,8 @@ function to_album_thumb($album) {
 // just enough info about an image to render it on a standalone page
 function to_image($image) {
 	$ret = array();
-	// strip /zenphoto/albums/ so that the path starts something like 2014/...
-	$ret['path'] = str_replace('/zenphoto/albums/', '', $image->getFullImage());
+	// strip /zenphoto/albums/ so that the path starts something like myAlbum/...
+	$ret['path'] = str_replace(ALBUMFOLDER, '', $image->getFullImage());
 	$ret['title'] = $image->getTitle();
 	$ret['date'] = to_timestamp($image->getDateTime());
 	$ret['description'] = $image->getDesc();
