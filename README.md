@@ -15,5 +15,5 @@ Examples:
 * http://mysite.com/myAlbum/?json returns myAlbum in JSON format
 * http://mysite.com/page/search/train?json returns search results in JSON format
 
-### Cross-domain AJAX
+## Cross-domain AJAX
 For security reasons it does not support AJAX requests from random domains. However, it does cross-domain AJAX as long as it's coming from a subdomain.   For example, you can have zenphoto on mysite.com and your web app on app.mysite.com.
