@@ -11,7 +11,7 @@ The API is read-only.  It cannot create or modify albums or images.
 Place the plugin file in Zenphoto's `/plugins` directory and enable it through Zenphoto's web admin.
 
 ## Usage
-Add "json" as a query string parameter to your URLs to get a JSON representation of the album or search results instead of the normal HTML.
+Add "`json`" as a query string parameter to your URLs to get a JSON representation of the album or search results instead of the normal HTML.
 
 Examples:
 * `http://mysite.com/myAlbum/?json` returns myAlbum in JSON format
