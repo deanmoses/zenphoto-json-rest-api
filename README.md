@@ -6,7 +6,7 @@ A JSON REST API plugin for Zenphoto.  Useful for building mobile apps and javasc
 This is read-only.  It cannot create or modify albums or images.
 
 ## Installation
-Place the plugin file in Zenphoto's `/plugins` directory and enable it through the Zenphoto's web admin.
+Place the plugin file in Zenphoto's `/plugins` directory and enable it through Zenphoto's web admin.
 
 ## Usage
 Add "json" as a query string parameter to your URLs to get a JSON representation of the album or search results instead of the normal HTML response.
