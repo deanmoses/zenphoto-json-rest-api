@@ -1,14 +1,11 @@
 <?php
 
 /**
- * A JSON REST API for ZenPhoto.  Supports building mobile apps,
- * javascript-heavy web apps, and other types of integrations.
+ * A JSON REST API for ZenPhoto.
  *
- * This filter will detect a query string parameter (?api) and
- * return a JSON representation of the album or search results
+ * This filter looks for a query string parameter '?json' and
+ * returns a JSON representation of the album or search results
  * instead of the normal HTML response.
- *
- * This is read-only.  It cannot create or modify albums or images.
  *
  * @author Dean Moses (deanmoses)
  * @package plugins
