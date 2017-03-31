@@ -12,8 +12,8 @@ Place the plugin file in Zenphoto's `/plugins` directory and enable it through Z
 Add "json" as a query string parameter to your URLs to get a JSON representation of the album or search results instead of the normal HTML.
 
 Examples:
-* http://mysite.com/myAlbum/?json returns myAlbum in JSON format
-* http://mysite.com/page/search/train?json returns search results in JSON format
+* `http://mysite.com/myAlbum/?json` returns myAlbum in JSON format
+* `http://mysite.com/page/search/train?json` returns search results in JSON format
 
 ## Cross-domain AJAX
-For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on mysite.com and your web app on app.mysite.com.
+For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
