@@ -160,6 +160,11 @@ class jsonRestApi {
 		self::add($ret, $album, 'getTitle');
 		self::add($ret, $album, 'getDesc');
 		$ret['date'] = self::dateToTimestamp($album->getDateTime());
+		$date_updated = self::dateToTimestamp($album->getUpdatedDate());
+		// I'm getting negative updatedDate on albums that don't have any direct child images
+		if ($date_updated && $date_updated > 0) {
+			$ret['date_updated'] = self::dateToTimestamp($album->getUpdatedDate());
+		}
 		self::add($ret, $album, 'getCustomData');
 		if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
 		$ret['image_size'] = (int) getOption('image_size');
@@ -167,10 +172,11 @@ class jsonRestApi {
 		
 		$thumbImage = $album->getAlbumThumbImage();
 		if ($thumbImage) {
-			$ret['url_thumb'] = $album->getAlbumThumbImage()->getThumb();
+			$ret['url_thumb'] = $thumbImage->getThumb();
 		}
 		
 		if (!$thumbOnly) {
+
 			// Add info about this albums' subalbums
 			$albums = array();
 			foreach ($album->getAlbums() as $folder) {
