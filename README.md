@@ -12,8 +12,9 @@ The API is read-only.  It cannot create or modify albums or images.
 2. Activate the plugin from the Zenphoto administration panel, under the *Plugins* tab
     
 ## Usage
-* Add "`json`" as a query string parameter to your gallery URLs to get a JSON representation of the album or search results instead of the normal HTML.   
-* Add "`json=deep`" to return information about all descendant albums.  Otherwise it only includes immediate child albums.  This has no effect on image or album URLs.
+Use your normal gallery URLs but add a query string parameter named "`json`" to get a JSON representation.  This works for albums, images and search results.   
+
+Add "`json=deep`" to return information about all descendant albums.  `deep` is ignored on images and searches.
 
 Examples:
 * `http://mysite.com/myAlbum/?json` get JSON about myAlbum and its immediate children
