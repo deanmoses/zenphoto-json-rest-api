@@ -5,7 +5,7 @@ A Zenphoto plugin that provides a JSON REST API to retrieve albums and run searc
 
 It's useful for building mobile apps and javascript-heavy web apps on top of Zenphoto.
 
-The API is read-only.  It cannot create or modify albums or images.
+The API is read-only; it cannot create or modify albums or images.
 
 ## Installation
 1. Place `json_rest_api.php` in the `/plugins` folder of your Zenphoto installation
