@@ -35,8 +35,8 @@ class jsonRestApi {
 
 		// If the request is coming from a subdomain, send the headers
 		// that allow cross domain AJAX.  This is important when the web 
-		// front end is being served from sub.domain.com, but its AJAX
-		// requests are hitting this zenphoto installation on domain.com
+		// front end is being served from sub.domain.com but its AJAX
+		// requests are hitting a zenphoto installation on domain.com
 
 		// Browsers send the Origin header only when making an AJAX request
 		// to a different domain than the page was served from.  Format: 
@@ -59,7 +59,7 @@ class jsonRestApi {
 	        }
 	    }
 
-	    // Add a Vary header so that browsers and CDNs know they need to cache different
+		// Add a Vary header so that browsers and CDNs know they need to cache different
 		// copies of the response when browsers send different Origin headers.  
 		// This allows us to have clients on foo.zenphoto.com and bar.zenphoto.com, 
 		// and the CDN will cache different copies of the response for each of them, 
@@ -81,7 +81,7 @@ class jsonRestApi {
 				$ret = to404("Image does not exist.");
 			}
 			else {
-				$ret['image'] = self::getImageData($_zp_current_image);
+				$ret['image'] = self::getImageData($_zp_current_image, true /* return more image info */);
 			}
 		}
 		// Else if system is in the context of an album
@@ -114,27 +114,22 @@ class jsonRestApi {
 		// the data structure we will be returning
 		$ret = array();
 
-		if ($gallery->getTitle()) $ret['title'] = $gallery->getTitle();
-		if ($gallery->getDesc()) $ret['description'] = $gallery->getDesc();
+		self::add($ret, $gallery, 'getTitle');
+		self::add($ret, $gallery, 'getDesc');
 
 		$ret['image_size'] = (int) getOption('image_size');
 		$ret['thumb_size'] = (int) getOption('thumb_size');
 
-		// Get the top-level albums
+		// For each top-level album
 	   	$subAlbumNames = $gallery->getAlbums();
 		if (is_array($subAlbumNames)) {
 			$albums = array();
 			foreach ($subAlbumNames as $subAlbumName) {
 				$subalbum = new Album($subAlbumName, $gallery);
 
-				// If the client asked for a deep tree, return all subalbums and descendants
-				if ($_GET['json'] === 'deep') {
-					$albums[] = self::getAlbumData($subalbum);
-				}
-				// Else return shallow: just the thumbnail info of immediate child albums
-				else {
-					$albums[] = self::getAlbumThumbData($subalbum);
-				}
+				// json=deep means get all descendant albums
+				$subalbumThumbOnly = $_GET['json'] !== 'deep';
+				$albums[] = self::getAlbumData($subalbum, $subalbumThumbOnly);
 			}
 			if ($albums) {
 				$ret['albums'] = $albums;
@@ -148,143 +143,117 @@ class jsonRestApi {
 	 * Return array containing full album.
 	 * 
 	 * @param Album $album
+	 * @param boolean $thumbOnly true: only get enough info to render this album's thumbnail
 	 * @return JSON-ready array
 	 */
-	static function getAlbumData($album) {
+	static function getAlbumData($album, $thumbOnly = false) {
 		global $_zp_current_image;
+
+		if (!$album) {
+			return;
+		}
 
 		// the data structure we will be returning
 		$ret = array();
 
 		$ret['path'] = $album->name;
-		
+		self::add($ret, $album, 'getTitle');
+		self::add($ret, $album, 'getDesc');
 		$ret['date'] = self::dateToTimestamp($album->getDateTime());
-		if ($album->getTitle()) $ret['title'] = $album->getTitle();
-		if ($album->getDesc()) $ret['description'] = $album->getDesc();
-		if ($album->getCustomData()) $ret['custom_data'] = $album->getCustomData();
+		self::add($ret, $album, 'getCustomData');
 		if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
 		$ret['image_size'] = (int) getOption('image_size');
 		$ret['thumb_size'] = (int) getOption('thumb_size');
 		
-		$thumb_path = $album->get('thumb');
-		if (!is_numeric($thumb_path)) {
-			$ret['thumb'] = $thumb_path;
-		}
-
 		$thumbImage = $album->getAlbumThumbImage();
 		if ($thumbImage) {
 			$ret['url_thumb'] = $album->getAlbumThumbImage()->getThumb();
 		}
 		
-		// Add info about this albums' subalbums
-		$albums = array();
-		foreach ($album->getAlbums() as $folder) {
-			$subalbum = newAlbum($folder);
-			// If the client asked for a deep tree, return all subalbums and descendants
-			if ($_GET['json'] === 'deep') {
-				$albums[] = self::getAlbumData($subalbum);
+		if (!$thumbOnly) {
+			// Add info about this albums' subalbums
+			$albums = array();
+			foreach ($album->getAlbums() as $folder) {
+				$subalbum = newAlbum($folder);
+				// json=deep means get all descendant albums
+				$subalbumThumbOnly = $_GET['json'] !== 'deep';
+				$albums[] = self::getAlbumData($subalbum, $subalbumThumbOnly);
 			}
-			// Else return shallow: just the thumbnail info of immediate child albums
-			else {
-				$albums[] = self::getAlbumThumbData($subalbum);
+			if ($albums) {
+				$ret['albums'] = $albums;
 			}
-		}
-		if ($albums) {
-			$ret['albums'] = $albums;
-		}
 
-		// Add info about this albums' images
-		$images = array();
-		foreach ($album->getImages() as $filename) {
-			$image = newImage($album, $filename);
-			$images[] = self::getImageData($image);
-		}
-		if ($images) {
-			$ret['images'] = $images;
-		}
-		
-		// Add info about parent album
-		$parentAlbum = self::getRelatedAlbumData($album->getParent());
-		if ($parentAlbum) {
-			$ret['parent_album'] = $parentAlbum; // would like to use 'parent' but that's a reserved word in javascript
-		}
-		
-		// Add info about next album
-		$nextAlbum = self::getRelatedAlbumData($album->getNextAlbum());
-		if ($nextAlbum) {
-			$ret['next'] = $nextAlbum;
-		}
-		
-		// Add info about prev album
-		$prevAlbum = self::getRelatedAlbumData($album->getPrevAlbum());
-		if ($prevAlbum) {
-			$ret['prev'] = $prevAlbum;
+			// Add info about this albums' images
+			$images = array();
+			foreach ($album->getImages() as $filename) {
+				$image = newImage($album, $filename);
+				$images[] = self::getImageData($image);
+			}
+			if ($images) {
+				$ret['images'] = $images;
+			}
+			
+			// Add info about parent album
+			$parentAlbum = self::getAlbumData($album->getParent(), true /*thumb only*/);
+			if ($parentAlbum) {
+				$ret['parent_album'] = $parentAlbum; // would like to use 'parent' but that's a reserved word in javascript
+			}
+			
+			// Add info about next album
+			$nextAlbum = self::getAlbumData($album->getNextAlbum(), true /*thumb only*/);
+			if ($nextAlbum) {
+				$ret['next'] = $nextAlbum;
+			}
+			
+			// Add info about prev album
+			$prevAlbum = self::getAlbumData($album->getPrevAlbum(), true /*thumb only*/);
+			if ($prevAlbum) {
+				$ret['prev'] = $prevAlbum;
+			}
 		}
 
 		return $ret;
 	}
 
 	/**
-	 * Return array containing just enough info about a parent / prev / next album to navigate to it.
+	 * Return array containing info about an image.
 	 * 
-	 * @param Album $album
+	 * @param Image $image
+	 * @param boolean $verbose true: return a larger set of the image's information
 	 * @return JSON-ready array
 	 */
-	static function getRelatedAlbumData($album) {
-		if ($album) {
-			$ret = array();
-			$ret['path'] = $album->name;
-			$ret['date'] = self::dateToTimestamp($album->getDateTime());
-			if ($album->getTitle()) $ret['title'] = $album->getTitle();
-			return $ret;
-		}
-		return;
-	}
-
-	/**
-	 * Return array containing just enough info about an album to render its thumbnail.
-	 * 
-	 * @param Album $album
-	 * @return JSON-ready array
-	 */
-	static function getAlbumThumbData($album) {
+	static function getImageData($image, $verbose = false) {
 		$ret = array();
-		$ret['path'] = $album->name;
-		$ret['date'] = self::dateToTimestamp($album->getDateTime());
-		if ($album->getTitle()) $ret['title'] = $album->getTitle();
-		if ($album->getCustomData()) $ret['custom_data'] = $album->getCustomData();
-		if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
-		$thumbImage = $album->getAlbumThumbImage();
-		if ($thumbImage) {
-			$ret['url_thumb'] = $album->getAlbumThumbImage()->getThumb();
-		}
-		
-		return $ret;
-	}
-
-	/**
-	 * Return array containing just enough info about an image to render it on a standalone page.
-	 * 
-	 * @param Album $album
-	 * @return JSON-ready array
-	 */
-	static function getImageData($image) {
-		$ret = array();
-		// strip /zenphoto/albums/ so that the path starts something like myAlbum/...
+		// strip /zenphoto/albums/ so that the image path starts something like myAlbum/...
 		$ret['path'] = str_replace(ALBUMFOLDER, '', $image->getFullImage());
+		self::add($ret, $image, 'getTitle');
+		self::add($ret, $image, 'getDesc');
 		$ret['date'] = self::dateToTimestamp($image->getDateTime());
-		if ($image->getTitle()) $ret['title'] = $image->getTitle();
-		if ($image->getDesc()) $ret['description'] = $image->getDesc();
 		$ret['url_full'] = $image->getFullImageURL();
 		$ret['url_sized'] = $image->getSizedImage(getOption('image_size'));
 		$ret['url_thumb'] = $image->getThumb();
 		$ret['width'] = (int) $image->getWidth();
 		$ret['height'] = (int) $image->getHeight();
+		$ret['index'] = (int) $image->getIndex();
+		self::add($ret, $image, 'getCredit');
+		self::add($ret, $image, 'getCopyright');
+
+		if ($verbose) {
+			self::add($ret, $image, 'getLocation');
+			self::add($ret, $image, 'getCity');
+			self::add($ret, $image, 'getState');
+			self::add($ret, $image, 'getCountry');
+			self::add($ret, $image, 'getCredit');
+			self::add($ret, $image, 'getTags');
+			self::add($ret, $image, 'getMetadata');
+		}
+		
 		return $ret;
 	}
 
 	/**
-	 * Return array containing search results.  Uses the SearchEngine defined in $_zp_current_search.
+	 * Return array containing search results.  
+	 * Uses the SearchEngine defined in $_zp_current_search.
 	 * 
 	 * @return JSON-ready array
 	 */
@@ -314,7 +283,7 @@ class jsonRestApi {
 		// add search results that are albums
 		$albumResults = array();
 		while (next_album()) {
-			$albumResults[] = self::getAlbumThumbData($_zp_current_album);
+			$albumResults[] = self::getAlbumData($_zp_current_album, true /* thumb only */);
 		}
 		if ($albumResults) {
 			$ret['albums'] = $albumResults;
@@ -336,6 +305,22 @@ class jsonRestApi {
 		$ret['status'] = 404;
 		$ret['message'] = $error_message;
 		return $ret;
+	}
+
+	/**
+	 * Invoke the specified obj->methodName and add it to the $ret array.
+	 * Does not add it if the method returns null or blank.
+	 * Lowercases the method name and strips off any 'get':  getCopyright becomes copyright.
+	 * 
+	 * @param array $ret the array that will eventually be converted into JSON
+	 * @param obj $obj instance of an object to invoke the method on
+	 * @param string $methodName name of method, like getCopyright
+	 */
+	static function add(&$ret, $obj, $methodName) {
+		$jsonName = strtolower(str_replace('get', '', $methodName));
+		if ($obj->{$methodName}()) {
+			$ret[$jsonName] = $obj->{$methodName}();
+		}
 	}
 
 	/**
