@@ -138,7 +138,12 @@ function do_rest_api() {
 	exitZP();
 }
 
-// return full album
+/**
+ * Return array containing full album.
+ * 
+ * @param Album $album
+ * @return JSON-ready array
+ */
 function to_album($album) {
 	global $_zp_current_image;
 	$ret = array();
@@ -205,7 +210,12 @@ function to_album($album) {
 	return $ret;
 }
 
-// just enough info about a parent / prev / next album to navigate to it
+/**
+ * Return array containing just enough info about a parent / prev / next album to navigate to it.
+ * 
+ * @param Album $album
+ * @return JSON-ready array
+ */
 function to_related_album($album) {
 	if ($album) {
 		$ret = array();
@@ -217,7 +227,12 @@ function to_related_album($album) {
 	return;
 }
 
-// just enough info about a child album to render its thumbnail
+/**
+ * Return array containing just enough info about an album to render its thumbnail.
+ * 
+ * @param Album $album
+ * @return JSON-ready array
+ */
 function to_album_thumb($album) {
 	$ret = array();
 	$ret['path'] = $album->name;
@@ -233,7 +248,12 @@ function to_album_thumb($album) {
 	return $ret;
 }
 
-// just enough info about an image to render it on a standalone page
+/**
+ * Return array containing just enough info about an image to render it on a standalone page.
+ * 
+ * @param Album $album
+ * @return JSON-ready array
+ */
 function to_image($image) {
 	$ret = array();
 	// strip /zenphoto/albums/ so that the path starts something like myAlbum/...
@@ -249,7 +269,16 @@ function to_image($image) {
 	return $ret;
 }
 
-// take a zenphoto date string and turn it into an integer timestamp
+// 
+/**
+ * Take a zenphoto date string and turn it into an integer timestamp of 
+ * seconds since the epoch.  Javascript uses milliseconds since the 
+ * epoch so javascript clients will neeed to multiply times 1000, like:
+ * new Date(1000*timestamp)
+ *
+ * @param string $dateString
+ * @return integer
+ */
 function to_timestamp($dateString) {
 	$a = strptime($dateString, '%Y-%m-%d %H:%M:%S'); //format:  2014-11-24 01:40:22
 	return (int) mktime($a['tm_hour'], $a['tm_min'], $a['tm_sec'], $a['tm_mon']+1, $a['tm_mday'], $a['tm_year']+1900);
