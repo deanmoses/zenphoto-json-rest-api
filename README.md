@@ -12,11 +12,14 @@ The API is read-only.  It cannot create or modify albums or images.
 2. Activate the plugin from the Zenphoto administration panel, under the *Plugins* tab
     
 ## Usage
-Add "`json`" as a query string parameter to your gallery URLs to get a JSON representation of the album or search results instead of the normal HTML.
+* Add "`json`" as a query string parameter to your gallery URLs to get a JSON representation of the album or search results instead of the normal HTML.   
+* Add "`json=deep`" to return information about all descendant albums.  Otherwise it will only thumbnail info of immediate child albums.  This has no effect on image or album URLs.
 
 Examples:
-* `http://mysite.com/myAlbum/?json` returns myAlbum in JSON format
-* `http://mysite.com/page/search/train/?json` returns search results in JSON format
+* `http://mysite.com/myAlbum/?json` returns info about myAlbum and its immediate children
+* `http://mysite.com/myAlbum/?json=deep` returns info about myAlbum and all its descendants
+* `http://mysite.com/myAlbum/myImage.jpg?json` returns info about myImage.jpg
+* `http://mysite.com/page/search/train/?json` returns search results about 'train'
 
 ## Cross-domain AJAX
 For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
