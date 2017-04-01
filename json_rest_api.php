@@ -108,7 +108,7 @@ class jsonRestApi {
 	/**
 	 * Return array representing the gallery itself and the root albums.
 	 * 
-	 * @param Gallery $gallery
+	 * @param obj $gallery Gallery object
 	 * @return JSON-ready array
 	 */
 	static function getGalleryData($gallery) {
@@ -122,11 +122,12 @@ class jsonRestApi {
 		$ret['thumb_size'] = (int) getOption('thumb_size');
 
 		// For each top-level album
-	   	$subAlbumNames = $gallery->getAlbums();
+		$subAlbumNames = $gallery->getAlbums();
+
 		if (is_array($subAlbumNames)) {
 			$albums = array();
 			foreach ($subAlbumNames as $subAlbumName) {
-				$subalbum = new Album($subAlbumName, $gallery);
+				$subalbum = newAlbum($subAlbumName, $gallery);
 
 				// json=deep means get all descendant albums
 				$subalbumThumbOnly = $_GET['json'] !== 'deep';
@@ -143,7 +144,7 @@ class jsonRestApi {
 	/**
 	 * Return array containing album.
 	 * 
-	 * @param Album $album
+	 * @param obj $album Album object
 	 * @param boolean $thumbOnly true: only return enough info to render this album's thumbnail
 	 * @return JSON-ready array
 	 */
@@ -225,7 +226,7 @@ class jsonRestApi {
 	/**
 	 * Return array containing info about an image.
 	 * 
-	 * @param Image $image
+	 * @param obj $image Image object
 	 * @param boolean $verbose true: return a larger set of the image's information
 	 * @return JSON-ready array
 	 */
