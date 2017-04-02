@@ -29,3 +29,11 @@ It can be very expensive to get a giant set of nested albums.  I can't call this
 
 ## Cross-domain AJAX
 For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
+
+## Localization
+The URLs above return the text content for your Zenphoto's default locale/language. If your Zenphoto is in multilingual mode, here's how to access language-specific content:
+* Enable the official `seo_locale` plugin to allow switching the language via URL
+* `http://mysite.com/<locale>/myAlbum/?json` now gets JSON about myAlbum in that locale, if any language-specific content exists.  Otherwise it gets content for the default language.
+* Example: `http://mysite.com/de_DE/myAlbum/?json` would get the German content
+
+This principle works with all the URLs above.

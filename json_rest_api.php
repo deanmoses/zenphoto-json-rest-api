@@ -108,7 +108,7 @@ class jsonRestApi {
 	/**
 	 * Return array containing info about the gallery itself and its root albums.
 	 * 
-	 * @param Gallery $gallery
+	 * @param obj $gallery Gallery object
 	 * @return JSON-ready array
 	 */
 	static function getGalleryData($gallery) {
@@ -143,7 +143,7 @@ class jsonRestApi {
 	/**
 	 * Return array containing info about an album.
 	 * 
-	 * @param Album $album
+	 * @param obj $album Album object
 	 * @param boolean $thumbOnly true: only return enough info to render this album's thumbnail
 	 * @return JSON-ready array
 	 */
@@ -225,7 +225,7 @@ class jsonRestApi {
 	/**
 	 * Return array containing info about an image.
 	 * 
-	 * @param Image $image
+	 * @param obj $image Image object
 	 * @param boolean $verbose true: return a larger set of the image's information
 	 * @return JSON-ready array
 	 */
