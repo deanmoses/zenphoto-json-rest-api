@@ -79,7 +79,7 @@ class jsonRestApi {
 		// Else if system is in the context of an image
 		else if ($_zp_current_image) {
 			if (!$_zp_current_image->exists) {
-				$ret = to404("Image does not exist.");
+				$ret = self::get404Data("Image does not exist.");
 			}
 			else {
 				$ret['image'] = self::getImageData($_zp_current_image, true /* return more image info */);
