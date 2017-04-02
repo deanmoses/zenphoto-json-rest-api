@@ -106,7 +106,7 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Return array representing the gallery itself and the root albums.
+	 * Return array containing info about the gallery itself and its root albums.
 	 * 
 	 * @param obj $gallery Gallery object
 	 * @return JSON-ready array
@@ -122,16 +122,15 @@ class jsonRestApi {
 		$ret['thumb_size'] = (int) getOption('thumb_size');
 
 		// For each top-level album
-		$subAlbumNames = $gallery->getAlbums();
-
+	   	$subAlbumNames = $gallery->getAlbums(0);
 		if (is_array($subAlbumNames)) {
+			// json=deep means get all descendant albums
+			$shallow = $_GET['json'] !== 'deep';
+
 			$albums = array();
 			foreach ($subAlbumNames as $subAlbumName) {
 				$subalbum = newAlbum($subAlbumName, $gallery);
-
-				// json=deep means get all descendant albums
-				$subalbumThumbOnly = $_GET['json'] !== 'deep';
-				$albums[] = self::getAlbumData($subalbum, $subalbumThumbOnly);
+				$albums[] = self::getAlbumData($subalbum, $shallow);
 			}
 			if ($albums) {
 				$ret['albums'] = $albums;
@@ -142,7 +141,7 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Return array containing album.
+	 * Return array containing info about an album.
 	 * 
 	 * @param obj $album Album object
 	 * @param boolean $thumbOnly true: only return enough info to render this album's thumbnail
@@ -178,14 +177,14 @@ class jsonRestApi {
 		}
 		
 		if (!$thumbOnly) {
+			// json=deep means get all descendant albums
+			$shallow = $_GET['json'] !== 'deep';
 
 			// Add info about this albums' subalbums
 			$albums = array();
-			foreach ($album->getAlbums() as $folder) {
+			foreach ($album->getAlbums(0) as $folder) {
 				$subalbum = newAlbum($folder);
-				// json=deep means get all descendant albums
-				$subalbumThumbOnly = $_GET['json'] !== 'deep';
-				$albums[] = self::getAlbumData($subalbum, $subalbumThumbOnly);
+				$albums[] = self::getAlbumData($subalbum, $shallow);
 			}
 			if ($albums) {
 				$ret['albums'] = $albums;
@@ -193,7 +192,7 @@ class jsonRestApi {
 
 			// Add info about this albums' images
 			$images = array();
-			foreach ($album->getImages() as $filename) {
+			foreach ($album->getImages(0) as $filename) {
 				$image = newImage($album, $filename);
 				$images[] = self::getImageData($image);
 			}
@@ -260,7 +259,7 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Return array containing search results.  
+	 * Return array containing info about search results.  
 	 * Uses the SearchEngine defined in $_zp_current_search.
 	 * 
 	 * @return JSON-ready array

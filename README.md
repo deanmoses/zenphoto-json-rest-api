@@ -24,16 +24,16 @@ Examples:
 * `http://mysite.com/?json` get JSON about the gallery itself and the top-level albums
 * `http://mysite.com/?json=deep` get JSON about the gallery itself and **EVERY ALBUM IN THE SYSTEM**
 
-Above urls get the text content for the locale/language the Zenphoto site is currently set in. Accessing language specific content if your Zenphoto site is in multilingual mode works as follows:
-
-* Enable the official `seo_locale` plugin to allow switching the language via url.
-* Now `http://mysite.com/<locale>/myAlbum/?json` would get the get JSON about myAlbum in that locale (if any specific content for it exists, otherwise the default). 
-* Example: `http://mysite.com/de_DE/myAlbum/?json` would get the German content
-
-The principle works with all urls above.
-
 ## Watch out for `json=deep`
 It can be very expensive to get a giant set of nested albums.  I can't call this on my *own* root gallery of about 1000 albums and 25000 images because it times out.
 
 ## Cross-domain AJAX
 For security reasons it does not support AJAX requests from random domains. However, it does allow cross-domain AJAX from subdomains.   For example, you can have zenphoto on `mysite.com` and your web app on `app.mysite.com`.
+
+## Localization
+The URLs above return the text content for your Zenphoto's default locale/language. If your Zenphoto is in multilingual mode, here's how to access language-specific content:
+* Enable the official `seo_locale` plugin to allow switching the language via URL
+* `http://mysite.com/<locale>/myAlbum/?json` now gets JSON about myAlbum in that locale, if any language-specific content exists.  Otherwise it gets content for the default language.
+* Example: `http://mysite.com/de_DE/myAlbum/?json` would get the German content
+
+This principle works with all the URLs above.
