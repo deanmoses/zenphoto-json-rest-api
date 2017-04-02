@@ -43,22 +43,22 @@ class jsonRestApi {
 		// to a different domain than the page was served from.  Format: 
 		// protocol://hostname that the web app was served from.  In most 
 		// cases it'll be a subdomain like http://cdn.zenphoto.com
-	    if (isset($_SERVER['HTTP_ORIGIN'])) {
-	    	// The Host header is the hostname the browser thinks it's 
-	    	// sending the AJAX request to. In most casts it'll be the root 
-	    	// domain like zenphoto.com
+		if (isset($_SERVER['HTTP_ORIGIN'])) {
+			// The Host header is the hostname the browser thinks it's 
+			// sending the AJAX request to. In most casts it'll be the root 
+			// domain like zenphoto.com
 
-	    	// If the Host is a substring within Origin, Origin is most likely a subdomain
-	    	// Todo: implement a proper 'endsWith'
-	        if (strpos($_SERVER['HTTP_ORIGIN'], $_SERVER['HTTP_HOST']) !== false) {
-	        	// Allow CORS requests from the subdomain the ajax request is coming from
-	        	header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+			// If the Host is a substring within Origin, Origin is most likely a subdomain
+			// Todo: implement a proper 'endsWith'
+			if (strpos($_SERVER['HTTP_ORIGIN'], $_SERVER['HTTP_HOST']) !== false) {
+				// Allow CORS requests from the subdomain the ajax request is coming from
+				header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
 
-	        	// Allow credentials to be sent in CORS requests. 
-	        	// Really only needed on requests requiring authentication
-	        	header('Access-Control-Allow-Credentials: true');
-	        }
-	    }
+				// Allow credentials to be sent in CORS requests. 
+				// Really only needed on requests requiring authentication
+				header('Access-Control-Allow-Credentials: true');
+			}
+		}
 
 		// Add a Vary header so that browsers and CDNs know they need to cache different
 		// copies of the response when browsers send different Origin headers.  
