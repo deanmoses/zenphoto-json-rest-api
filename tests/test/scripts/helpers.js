@@ -80,3 +80,59 @@ exports.is404Json = function(errorMessage) {
         });
     }
 };
+
+
+exports.isImage = function() {
+    this.is200();
+    this.isJson();
+
+    it('should be an image', function(done) {
+        var response = this.response;
+        response.body.should.be.an('object').with.keys(['image']);
+        response.body.image.should.be.an('object').and.not.empty;
+        response.body.image.should.be.jsonSchema(
+            {
+                "title": "Image",
+                "description": "A Zenphoto image",
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string"
+                    },
+                    "date": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "desc": {
+                        "type": "string"
+                    },
+                    "url_full": {
+                        "type": "string"
+                    },
+                    "url_sized": {
+                        "type": "string"
+                    },
+                    "url_thumb": {
+                        "type": "string"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "index": {
+                        "type": "integer"
+                    },
+                    "metadata": {
+                        "type": "object"
+                    }
+                },
+                "required": ["path", "date", "title", "desc", "url_full", "url_sized", "url_thumb", "width", "height", "index", "metadata"]
+            }
+        );
+        done();
+    });
+};
