@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Test that gallery requests return the correct data
+ * Test that requests for the root gallery return the correct data
  */
 
 var chai = require('chai');
