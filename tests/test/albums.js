@@ -35,6 +35,12 @@ describe("Albums", function() {
 	suite.do('Album - deep', function() {
 		suite.helpers.isAlbum();
 
+		it('Has at least two images', function(done) {
+			var album = this.response.body.album;
+		    album.images.should.have.length.above(1);
+		    done();
+		});
+
 		it('First subalbum has at least two images', function(done) {
 			var album = this.response.body.album;
 		    album.albums[0].images.should.have.length.above(1);
@@ -44,6 +50,12 @@ describe("Albums", function() {
 		it('First subalbum has at least one sub-subalbum', function(done) {
 			var album = this.response.body.album;
 		    album.albums[0].albums.should.have.length.above(0);
+		    done();
+		});
+
+		it('First sub-subalbum has at least two images', function(done) {
+			var album = this.response.body.album;
+		    album.albums[0].albums[0].images.should.have.length.above(1);
 		    done();
 		});
 	});
