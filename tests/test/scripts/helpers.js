@@ -81,12 +81,11 @@ exports.is404Json = function(errorMessage) {
     }
 };
 
-
 exports.isImage = function() {
     this.is200();
     this.isJson();
 
-    it('should be an image', function(done) {
+    it('Is image', function(done) {
         var response = this.response;
         response.body.should.be.an('object').with.keys(['image']);
         response.body.image.should.be.an('object').and.not.empty;
@@ -133,6 +132,61 @@ exports.isImage = function() {
                 "required": ["path", "date", "title", "desc", "url_full", "url_sized", "url_thumb", "width", "height", "index", "metadata"]
             }
         );
+        done();
+    });
+};
+
+exports.isAlbum = function() {
+    this.is200();
+    this.isJson();
+
+    it('Is album', function(done) {
+        var response = this.response;
+        response.body.should.be.an('object').with.keys(['album']);
+        response.body.album.should.be.an('object').and.not.empty;
+        response.body.album.should.be.jsonSchema(
+            {
+                "title": "Album",
+                "description": "A Zenphoto album",
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string"
+                    },
+                    "date": {
+                        "type": "integer"
+                    },
+                    "date_updated": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "image_size": {
+                        "type": "integer"
+                    },
+                    "thumb_size": {
+                        "type": "integer"
+                    },
+                    "url_thumb": {
+                        "type": "string"
+                    },
+                    "albums": {
+                        "type": "array"
+                    },
+                    "next": {
+                        "type": "object"
+                    },
+                    "prev": {
+                        "type": "object"
+                    }
+                },
+                "required": ["path", "date", "title", "image_size", "thumb_size", "url_thumb"]
+            }
+        );
+        if (response.body.album.date_updated) {
+            response.body.album.date_updated.should.be.above(0);
+        }
         done();
     });
 };
