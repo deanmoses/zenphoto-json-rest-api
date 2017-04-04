@@ -3,16 +3,20 @@ Tests for Zenphoto JSON REST API
 
 These tests run on Node.js.
 
-## Setting up to run the tests
-#. Install Node.js
-#. Get this project from github
-#. Then:
+## Setup to run the tests
+1.  Install Node.js
+1.  Install Zenphoto
+1.  Get this project from github
+1.  Install the REST API plugin
+1.  Set up the test data by symlinking `tests/testdata/albums` to the Zenphoto albums directory
+1.  Then:
 ```
-cd cd [project root]/test
-npm install # installs all the Node.js dependencies for this project
+cd [PROJECT ROOT]/tests
+npm install # installs all the Node.js dependencies for the tests
 ```
-## Running the tests
+## Run the tests
 ```
-cd [project root]/test
+cd [PROJECT ROOT]/tests
 npm test
 ```
+The test success/failure messages will display in the terminal.
