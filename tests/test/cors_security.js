@@ -21,12 +21,11 @@ describe("CORS Security", function() {
 		suite.helpers.is200();
 		suite.helpers.isJson();
 
-		it('Should have CORS headers', function(done) {
+		it('Should have CORS headers', function() {
 			this.skip(); // test is right, production code is broken
 			var response = this.response;
 			response.should.have.header('access-control-allow-origin', subdomain);
 		    response.should.have.header('access-control-allow-credentials', 'true');
-		    done();
 		});
 	});
 
@@ -41,11 +40,10 @@ describe("CORS Security", function() {
 		suite.helpers.is200();
 		suite.helpers.isJson();
 
-		it('Should NOT have CORS headers', function(done) {
+		it('Should NOT have CORS headers', function() {
 			var response = this.response;
 		    response.should.not.have.header('access-control-allow-origin');
 		    response.should.not.have.header('access-control-allow-credentials');
-		    done();
 		});
 	});
 
@@ -58,11 +56,10 @@ describe("CORS Security", function() {
 		suite.helpers.is200();
 		suite.helpers.isJson();
 
-		it('Should NOT have CORS headers', function(done) {
+		it('Should NOT have CORS headers', function() {
 			var response = this.response;
 		    response.should.not.have.header('access-control-allow-origin');
 		    response.should.not.have.header('access-control-allow-credentials');
-		    done();
 		});
 	});
 

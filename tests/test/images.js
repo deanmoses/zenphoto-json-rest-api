@@ -19,30 +19,26 @@ describe("Images", function() {
 
 		suite.helpers.isImage();
 
-		it('Has copyright', function(done) {
+		it('Has copyright', function() {
 			var image = this.response.body.image;
 		    image.copyright.should.equal('©Sample Copyright');
-		    done();
 		});
 
-		it('Has correct top level location info', function(done) {
+		it('Has correct top level location info', function() {
 			var image = this.response.body.image;
 		    image.city.should.equal('San Francisco');
 		    image.state.should.equal('CA');
 		    image.country.should.equal('USA');
-		    done();
 		});
 
-		it('Has correct tags', function(done) {
+		it('Has correct tags', function() {
 			var image = this.response.body.image;
 		    image.tags.should.be.an('array').and.include('test1');
-		    done();
 		});
 
-		it('Has correct EXIF metadata', function(done) {
+		it('Has correct EXIF metadata', function() {
 			var image = this.response.body.image;
 		    image.metadata.EXIFMake.should.equal('Sony');
-		    done();
 		});
 	});
 

@@ -18,16 +18,14 @@ describe("Albums", function() {
 	suite.do('Album - shallow', function() {
 		suite.helpers.isAlbum();
 
-		it('Has at least two images', function(done) {
+		it('Has at least two images', function() {
 			var album = this.response.body.album;
 		    album.images.should.have.length.above(1);
-		    done();
 		});
 
-		it('First subalbum should have no subalbums', function(done) {
+		it('First subalbum should have no subalbums', function() {
 			var album = this.response.body.album;
 			should.not.exist(album.albums[0].albums);
-		    done();
 		});		
 	});
 
@@ -35,28 +33,24 @@ describe("Albums", function() {
 	suite.do('Album - deep', function() {
 		suite.helpers.isAlbum();
 
-		it('Has at least two images', function(done) {
+		it('Has at least two images', function() {
 			var album = this.response.body.album;
 		    album.images.should.have.length.above(1);
-		    done();
 		});
 
-		it('First subalbum has at least two images', function(done) {
+		it('First subalbum has at least two images', function() {
 			var album = this.response.body.album;
 		    album.albums[0].images.should.have.length.above(1);
-		    done();
 		});
 
-		it('First subalbum has at least one sub-subalbum', function(done) {
+		it('First subalbum has at least one sub-subalbum', function() {
 			var album = this.response.body.album;
 		    album.albums[0].albums.should.have.length.above(0);
-		    done();
 		});
 
-		it('First sub-subalbum has at least two images', function(done) {
+		it('First sub-subalbum has at least two images', function() {
 			var album = this.response.body.album;
 		    album.albums[0].albums[0].images.should.have.length.above(1);
-		    done();
 		});
 	});
 
