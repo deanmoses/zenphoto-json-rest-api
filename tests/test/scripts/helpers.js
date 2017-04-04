@@ -190,3 +190,41 @@ exports.isAlbum = function() {
         done();
     });
 };
+
+
+exports.isGallery = function() {
+    this.is200();
+    this.isJson();
+
+    it('Is gallery', function(done) {
+        var response = this.response;
+        response.body.should.be.an('object').with.keys(['gallery']);
+        response.body.gallery.should.be.an('object').and.not.empty;
+        response.body.gallery.should.be.jsonSchema(
+            {
+                "title": "Gallery",
+                "description": "A Zenphoto gallery",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "image_size": {
+                        "type": "integer"
+                    },
+                    "thumb_size": {
+                        "type": "integer"
+                    },
+                    "albums": {
+                        "type": "array"
+                    }
+                },
+                "required": ["title", "desc", "image_size", "thumb_size", "albums"]                    
+            }
+        );
+        done();
+    });
+};
