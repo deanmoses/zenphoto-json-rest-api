@@ -191,7 +191,6 @@ exports.isAlbum = function() {
     });
 };
 
-
 exports.isGallery = function() {
     this.is200();
     this.isJson();
@@ -223,6 +222,37 @@ exports.isGallery = function() {
                     }
                 },
                 "required": ["title", "desc", "image_size", "thumb_size", "albums"]                    
+            }
+        );
+        done();
+    });
+};
+
+exports.isSearch = function() {
+    this.is200();
+    this.isJson();
+
+    it('Is search', function(done) {
+        var response = this.response;
+        response.body.should.be.an('object').with.keys(['search']);
+        response.body.search.should.be.an('object').and.not.empty;
+        response.body.search.should.be.jsonSchema(
+            {
+                "title": "Search",
+                "description": "A Zenphoto search",
+                "type": "object",
+                "properties": {
+                    "thumb_size": {
+                        "type": "integer"
+                    },
+                    "images": {
+                        "type": "array"
+                    },
+                    "albums": {
+                        "type": "array"
+                    }
+                },
+                "required": ["thumb_size"]
             }
         );
         done();
