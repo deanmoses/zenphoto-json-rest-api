@@ -23,7 +23,7 @@ describe("Albums", function() {
 		    album.images.should.have.length.above(1);
 		});
 
-		it('First subalbum should have no subalbums', function() {
+		it('First subalbum has no subalbums', function() {
 			var album = this.response.body.album;
 			should.not.exist(album.albums[0].albums);
 		});		
