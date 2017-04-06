@@ -13,7 +13,7 @@
 $plugin_is_filter = 900 | FEATURE_PLUGIN;
 $plugin_description = gettext_pl('JSON REST API for Zenphoto', 'json_rest_api');
 $plugin_author = 'Dean Moses (deanmoses)';
-$plugin_version = '0.2.0';
+$plugin_version = '0.3.0';
 $plugin_URL = 'https://github.com/deanmoses/zenphoto-json-rest-api';
 
 // Handle REST API calls before anything else
@@ -122,7 +122,7 @@ class jsonRestApi {
 		$ret['thumb_size'] = (int) getOption('thumb_size');
 
 		// For each top-level album
-	   	$subAlbumNames = $gallery->getAlbums(0);
+	   	$subAlbumNames = $gallery->getAlbums(self::getCurrentPage());
 		if (is_array($subAlbumNames)) {
 			// json=deep means get all descendant albums
 			$shallow = $_GET['json'] !== 'deep';
@@ -182,7 +182,7 @@ class jsonRestApi {
 
 			// Add info about this albums' subalbums
 			$albums = array();
-			foreach ($album->getAlbums(0) as $folder) {
+			foreach ($album->getAlbums(self::getCurrentPage()) as $folder) {
 				$subalbum = newAlbum($folder);
 				$albums[] = self::getAlbumData($subalbum, $shallow);
 			}
@@ -192,7 +192,7 @@ class jsonRestApi {
 
 			// Add info about this albums' images
 			$images = array();
-			foreach ($album->getImages(0) as $filename) {
+			foreach ($album->getImages(self::getCurrentPage()) as $filename) {
 				$image = newImage($album, $filename);
 				$images[] = self::getImageData($image);
 			}
@@ -277,7 +277,7 @@ class jsonRestApi {
 		
 		// add search results that are images
 		$imageResults = array();
-		$images = $_zp_current_search->getImages();
+		$images = $_zp_current_search->getImages(self::getCurrentPage());
 		foreach ($images as $image) {
 			$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
 			$imageObject = $_zp_current_search->getImage($imageIndex);
@@ -312,6 +312,17 @@ class jsonRestApi {
 		$ret['status'] = 404;
 		$ret['message'] = $error_message;
 		return $ret;
+	}
+
+	/**
+	 * Get the page number of paginated results.
+	 *
+	 * @return integer page number.  0 if results should not be paginated
+	 */
+	static function getCurrentPage() {
+		global $_zp_page;
+		// pagination=off means return 0, which tells Zenphoto to get all images and subalbums
+		return isset($_GET['pagination']) && $_GET['pagination'] === 'off' ? 0 : $_zp_page;
 	}
 
 	/**

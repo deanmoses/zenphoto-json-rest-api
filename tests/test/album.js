@@ -14,7 +14,10 @@ var ZenSuite = require('./scripts/zen_suite.js');
 describe("Albums", function() {
 	var suite;
 
-	suite = new ZenSuite('/album1/?json')
+	/**
+	 * Test getting shallow album
+	 */
+	suite = new ZenSuite('/album1/?json&pagination=off')
 	suite.do('Album - shallow', function() {
 		suite.helpers.isAlbum();
 
@@ -29,7 +32,10 @@ describe("Albums", function() {
 		});		
 	});
 
-	suite = new ZenSuite('/album1/?json=deep')
+	/**
+	 * Test getting deep, recursive album
+	 */
+	suite = new ZenSuite('/album1/?json=deep&pagination=off')
 	suite.do('Album - deep', function() {
 		suite.helpers.isAlbum();
 
@@ -53,5 +59,31 @@ describe("Albums", function() {
 		    album.albums[0].albums[0].images.should.have.length.above(1);
 		});
 	});
+
+	/**
+	 * Test that the first page of an album returns exactly the page limit of images.
+	 */
+	suite = new ZenSuite('/album3/?json')
+	suite.do('Album - first page', function() {
+		suite.helpers.isAlbum();
+
+		it('Has full page of images', function() {
+			var album = this.response.body.album;
+		    album.images.should.have.length.of(20);
+		});
+	});
+
+	/**
+	 * Test that the last page of an album returns less than the page limit of images.
+	 */
+	suite = new ZenSuite('/album3/page/2/?json')
+	suite.do('Album - last page', function() {
+		suite.helpers.isAlbum();
+
+		it('Does not have full page of images', function() {
+			var album = this.response.body.album;
+		    album.images.should.have.length.below(20);
+		});
+	});	
 
 });

@@ -12,17 +12,22 @@ The API is read-only; it cannot create or modify albums or images.
 2. Activate the plugin from your Zenphoto administration panel, under the *Plugins* tab
     
 ## Usage
-Use your normal gallery URLs but add a query string parameter named "`json`" to get a JSON representation.  This works for albums, images and search results.   
+Use your normal gallery URLs but add a query string parameter named "`json`" to get a JSON representation.  This works for albums, images and search results.
 
-Use "`json=deep`" to return information about all descendant albums.  Otherwise it will only return information about immediate child albums.  `deep` is ignored on images and searches.
+Use "`json=deep`" to return information about all descendant albums.  Otherwise it will only return information about immediate child albums.  `deep` has no effect on images and searches.
+
+Use "`pagination=off`" to return the full unpaginated set of results.  Without this parameter, it will respect Zenphoto's normal pagination.  `pagination` has no effect on images.
 
 Examples:
 * `http://mysite.com/myAlbum/?json` get JSON about myAlbum and its immediate child albums
 * `http://mysite.com/myAlbum/?json=deep` get JSON  about myAlbum and all its descendants
+* `http://mysite.com/myAlbum/?json&pagination=off` get JSON about myAlbum and all its descendants, unpaginated
 * `http://mysite.com/myAlbum/myImage.jpg?json` get JSON about myImage.jpg
 * `http://mysite.com/page/search/train/?json` get JSON search results about 'train'
+* `http://mysite.com/page/search/train/?json&pagination=off` get JSON search results about 'train', unpaginated
 * `http://mysite.com/?json` get JSON about the gallery itself and the top-level albums
 * `http://mysite.com/?json=deep` get JSON about the gallery itself and **EVERY ALBUM IN THE SYSTEM**
+* `http://mysite.com/?json&pagination=off` get JSON about the gallery itself and the top-level albums, unpaginated
 
 ## Watch out for `json=deep`
 It can be very expensive to get a giant set of nested albums.  I can't call this on my *own* root gallery of about 1000 albums and 25000 images because it times out.
