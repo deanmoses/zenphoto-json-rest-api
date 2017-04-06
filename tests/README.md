@@ -8,7 +8,7 @@ These tests run on Node.js.
 1.  Install Zenphoto
 1.  Get this project from GitHub
 1.  Install the REST API plugin into Zenphoto. You can copy or symlink it.
-1.  Set up the test data by copying or symlinking `tests/testdata/albums` to the Zenphoto albums directory.
+1.  Set up the test data by making `tests/testdata/albums` the Zenphoto albums directory. It must *replace* the root album folder. You can copy or symlink it.
 1.  Then:
 ```
 cd [PROJECT ROOT]/tests
