@@ -20,6 +20,7 @@ Use "`pagination=off`" to return the full unpaginated set of results.  Without t
 
 Examples:
 * `http://mysite.com/myAlbum/?json` get JSON about myAlbum and its immediate child albums
+* `http://mysite.com/myAlbum/page/2/?json` get JSON about myAlbum and the second page of its immediate child albums
 * `http://mysite.com/myAlbum/?json=deep` get JSON  about myAlbum and all its descendants
 * `http://mysite.com/myAlbum/?json&pagination=off` get JSON about myAlbum and all its descendants, unpaginated
 * `http://mysite.com/myAlbum/myImage.jpg?json` get JSON about myImage.jpg
