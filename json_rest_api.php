@@ -11,8 +11,8 @@
  * @subpackage development
  */
 $plugin_is_filter = 900 | FEATURE_PLUGIN;
-$plugin_description = gettext('JSON REST API for Zenphoto');
-$plugin_author = "Dean Moses (deanmoses)";
+$plugin_description = gettext_pl('JSON REST API for Zenphoto', 'json_rest_api');
+$plugin_author = 'Dean Moses (deanmoses)';
 $plugin_version = '0.2.0';
 $plugin_URL = 'https://github.com/deanmoses/zenphoto-json-rest-api';
 
@@ -79,7 +79,7 @@ class jsonRestApi {
 		// Else if system is in the context of an image
 		else if ($_zp_current_image) {
 			if (!$_zp_current_image->exists) {
-				$ret = self::get404Data("Image does not exist.");
+				$ret = self::get404Data(gettext_pl('Image does not exist.', 'json_rest_api'));
 			}
 			else {
 				$ret['image'] = self::getImageData($_zp_current_image, true /* return more image info */);
@@ -88,7 +88,7 @@ class jsonRestApi {
 		// Else if system is in the context of an album
 		else if ($_zp_current_album) {
 			if (!$_zp_current_album->exists) {
-				$ret = self::get404Data("Album does not exist.");
+				$ret = self::get404Data(gettext_pl('Album does not exist.', 'json_rest_api'));
 			}
 			else {
 				$ret['album'] = self::getAlbumData($_zp_current_album);
