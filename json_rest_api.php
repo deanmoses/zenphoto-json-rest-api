@@ -25,6 +25,26 @@ if (!OFFSET_PATH && isset($_GET['json'])) {
 class jsonRestApi {
 
 	/**
+	 * Name of the stats plugin
+	 */
+	static $statsPluginName = 'image_album_statistics';
+
+	/**
+	 * Whether the stats plugin is enabled.  Boolean.  Null means value hasn't been determined yet.
+	 */
+	static $statsPluginEnabled = null;
+
+	/**
+	 * The types of album stats available in the stats plugin.
+	 */
+	static $albumStatTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'latestupdated', 'random'];
+
+	/**
+	 * The types of image stats available in the stats plugin.
+	 */
+	static $imageStatTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'random'];
+
+	/**
 	 * Respond to the request with JSON rather than the normal HTML.
 	 *
 	 * This does not return; it exits Zenphoto.
@@ -140,94 +160,6 @@ class jsonRestApi {
 		self::addAlbumStats($ret);
 		self::addImageStats($ret);
 		
-		return $ret;
-	}
-
-	/**
-	 * Return array containing every album stat requested on the query string.
-	 *
-	 * @param array $ret the global data structure that will be turned into the JSON response
-	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
-	 * @return JSON-ready array of multiple album stats
-	 */
-	static function addAlbumStats(&$ret, $albumFolder = null) {
-		$statTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'latestupdated', 'random'];
-		foreach ($statTypes as $statType) {
-			$statTypeQueryParam = $statType . '-albums';
-			if (isset($_GET[$statTypeQueryParam])) {
-				$count = $_GET[$statTypeQueryParam];
-				$ret['album_stats'][$statType] = self::getAlbumStatData($statType, $count, $albumFolder);
-			}
-		}
-	}
-
-	/**
-	 * Return array of data for a single album stat.
-	 *
-	 * @param string $statType any of the album stat types defined in the image_album_statistics plugin
-	 * @param int $count number of albums to return
-	 * @return JSON-ready array of albums
-	 */
-	static function getAlbumStatData($statType, $count) {
-		// the data structure we will be returning
-		$ret = array();
-
-		if (!ctype_digit($count) || $count > 100) {
-			$count = 1;
-		}
-
-		// TODO: detect whether the image_album_statistics plugin is enabled
-		require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/image_album_statistics.php');
-		$albums = getAlbumStatistic($count, $statType);
-		if (is_array($albums)) {
-			foreach($albums as $album) {
-				$ret[] = self::getAlbumData($album, true /*thumb only*/);
-			}
-		}
-		return $ret;
-	}
-
-	/**
-	 * Return array containing every image stat requested on the query string.
-	 *
-	 * @param array $ret the global data structure that will be turned into the JSON response
-	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
-	 * @return JSON-ready array of multiple image stats
-	 */
-	static function addImageStats(&$ret, $albumFolder = null) {
-		$statTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'random'];
-		foreach ($statTypes as $statType) {
-			$statTypeQueryParam = $statType . '-images';
-			if (isset($_GET[$statTypeQueryParam])) {
-				$count = $_GET[$statTypeQueryParam];
-				$ret['image_stats'][$statType] = self::getImageStatData($statType, $count, $albumFolder);
-			}
-		}
-	}
-
-	/**
-	 * Return array of data for a single image stat.
-	 *
-	 * @param string $statType any of the image stat types defined in the image_album_statistics plugin
-	 * @param int $count number of images to return
-	 * @return JSON-ready array of images
-	 */
-	static function getImageStatData($statType, $count) {
-		// the data structure we will be returning
-		$ret = array();
-
-		if (!ctype_digit($count) || $count > 100) {
-			$count = 1;
-		}
-
-		// TODO: detect whether the image_album_statistics plugin is enabled
-		require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/image_album_statistics.php');
-		$images = getImageStatistic($count, $statType);
-		if (is_array($images)) {
-			foreach($images as $image) {
-				$ret[] = self::getImageData($image);
-			}
-		}
 		return $ret;
 	}
 
@@ -403,6 +335,115 @@ class jsonRestApi {
 		$ret['status'] = 404;
 		$ret['message'] = $error_message;
 		return $ret;
+	}
+
+	/**
+	 * Add every album stat requested on the query string into $ret.
+	 *
+	 * @param array $ret the global data structure that will be turned into the JSON response
+	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 */
+	static function addAlbumStats(&$ret, $albumFolder = null) {
+		foreach (self::$albumStatTypes as $statType) {
+			$statTypeQueryParam = $statType . '-albums';
+			// The order of isset(GET) and isStatsPluginEnabled is important: 
+			// isStatsPluginEnabled may write an error message into $ret and
+			// we only want it to be written if at least one stat was actually
+			// requested.
+			if (isset($_GET[$statTypeQueryParam]) && self::isStatsPluginEnabled($ret)) {
+				$count = $_GET[$statTypeQueryParam];
+				$ret['stats']['album'][$statType] = self::getAlbumStatData($statType, $count, $albumFolder);
+			}
+		}
+	}
+
+	/**
+	 * Return array of data for a single album stat.
+	 *
+	 * @param string $statType any of the album stat types defined in the stats plugin
+	 * @param int $count number of albums to return
+	 * @return JSON-ready array of albums
+	 */
+	static function getAlbumStatData($statType, $count) {
+		// the data structure we will be returning
+		$ret = array();
+
+		if (!ctype_digit($count) || $count > 100) {
+			$count = 1;
+		}
+
+		$albums = getAlbumStatistic($count, $statType);
+		if (is_array($albums)) {
+			foreach($albums as $album) {
+				$ret[] = self::getAlbumData($album, true /*thumb only*/);
+			}
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * Add every image stat requested on the query string to $ret.
+	 *
+	 * @param array $ret the global data structure that will be turned into the JSON response
+	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 */
+	static function addImageStats(&$ret, $albumFolder = null) {
+		foreach (self::$imageStatTypes as $statType) {
+			$statTypeQueryParam = $statType . '-images';
+			// The order of isset(GET) and isStatsPluginEnabled is important: 
+			// isStatsPluginEnabled may write an error message into $ret and
+			// we only want it to be written if at least one stat was actually
+			// requested.
+			if (isset($_GET[$statTypeQueryParam]) && self::isStatsPluginEnabled($ret)) {
+				$count = $_GET[$statTypeQueryParam];
+				$ret['image_stats'][$statType] = self::getImageStatData($statType, $count, $albumFolder);
+			}
+		}
+	}
+
+	/**
+	 * Return array of data for a single image stat.
+	 *
+	 * @param string $statType any of the image stat types defined in the image_album_statistics plugin
+	 * @param int $count number of images to return
+	 * @return JSON-ready array of images
+	 */
+	static function getImageStatData($statType, $count) {
+		// the data structure we will be returning
+		$ret = array();
+
+		if (!ctype_digit($count) || $count > 100) {
+			$count = 1;
+		}
+
+		$images = getImageStatistic($count, $statType);
+		if (is_array($images)) {
+			foreach($images as $image) {
+				$ret[] = self::getImageData($image);
+			}
+		}
+		return $ret;
+	}
+
+	/**
+	 * Return whether the stats plugin is enabled.  If not, add error message to $ret.
+	 *
+	 * @param array $ret the main JSON-ready array
+	 * @return boolean
+	 */
+	static function isStatsPluginEnabled(&$ret) {
+		if (self::$statsPluginEnabled === null) {
+			self::$statsPluginEnabled = extensionEnabled(self::$statsPluginName);
+			if (!self::$statsPluginEnabled) {
+				$errorMessage = gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName;
+				$ret['stats']['error'] = $errorMessage;
+			}
+			else {
+				require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/' . self::$statsPluginName . '.php');
+			}
+		}
+		return self::$statsPluginEnabled;
 	}
 
 	/**
