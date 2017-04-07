@@ -137,6 +137,97 @@ class jsonRestApi {
 			}
 		}
 
+		self::addAlbumStats($ret);
+		self::addImageStats($ret);
+		
+		return $ret;
+	}
+
+	/**
+	 * Return array containing every album stat requested on the query string.
+	 *
+	 * @param array $ret the global data structure that will be turned into the JSON response
+	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 * @return JSON-ready array of multiple album stats
+	 */
+	static function addAlbumStats(&$ret, $albumFolder = null) {
+		$statTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'latestupdated', 'random'];
+		foreach ($statTypes as $statType) {
+			$statTypeQueryParam = $statType . '-albums';
+			if (isset($_GET[$statTypeQueryParam])) {
+				$count = $_GET[$statTypeQueryParam];
+				$ret['album_stats'][$statType] = self::getAlbumStatData($statType, $count, $albumFolder);
+			}
+		}
+	}
+
+	/**
+	 * Return array of data for a single album stat.
+	 *
+	 * @param string $statType any of the album stat types defined in the image_album_statistics plugin
+	 * @param int $count number of albums to return
+	 * @return JSON-ready array of albums
+	 */
+	static function getAlbumStatData($statType, $count) {
+		// the data structure we will be returning
+		$ret = array();
+
+		if (!ctype_digit($count) || $count > 100) {
+			$count = 1;
+		}
+
+		// TODO: detect whether the image_album_statistics plugin is enabled
+		require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/image_album_statistics.php');
+		$albums = getAlbumStatistic($count, $statType);
+		if (is_array($albums)) {
+			foreach($albums as $album) {
+				$ret[] = self::getAlbumData($album, true /*thumb only*/);
+			}
+		}
+		return $ret;
+	}
+
+	/**
+	 * Return array containing every image stat requested on the query string.
+	 *
+	 * @param array $ret the global data structure that will be turned into the JSON response
+	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 * @return JSON-ready array of multiple image stats
+	 */
+	static function addImageStats(&$ret, $albumFolder = null) {
+		$statTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'random'];
+		foreach ($statTypes as $statType) {
+			$statTypeQueryParam = $statType . '-images';
+			if (isset($_GET[$statTypeQueryParam])) {
+				$count = $_GET[$statTypeQueryParam];
+				$ret['image_stats'][$statType] = self::getImageStatData($statType, $count, $albumFolder);
+			}
+		}
+	}
+
+	/**
+	 * Return array of data for a single image stat.
+	 *
+	 * @param string $statType any of the image stat types defined in the image_album_statistics plugin
+	 * @param int $count number of images to return
+	 * @return JSON-ready array of images
+	 */
+	static function getImageStatData($statType, $count) {
+		// the data structure we will be returning
+		$ret = array();
+
+		if (!ctype_digit($count) || $count > 100) {
+			$count = 1;
+		}
+
+		// TODO: detect whether the image_album_statistics plugin is enabled
+		require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/image_album_statistics.php');
+		$images = getImageStatistic($count, $statType);
+		if (is_array($images)) {
+			foreach($images as $image) {
+				$ret[] = self::getImageData($image);
+			}
+		}
 		return $ret;
 	}
 
@@ -175,7 +266,7 @@ class jsonRestApi {
 		if ($thumbImage) {
 			$ret['url_thumb'] = $thumbImage->getThumb();
 		}
-		
+
 		if (!$thumbOnly) {
 			// json=deep means get all descendant albums
 			$shallow = $_GET['json'] !== 'deep';
