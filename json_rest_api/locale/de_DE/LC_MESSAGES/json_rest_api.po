@@ -1,0 +1,146 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: json_rest_api\n"
+"POT-Creation-Date: 2017-04-09 11:36+0200\n"
+"PO-Revision-Date: 2017-04-09 11:37+0200\n"
+"Last-Translator: Malte Müller (acrylian) <wartgart@gmx.net>\n"
+"Language-Team: Malte Müller\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0\n"
+"X-Poedit-Basepath: ../../../..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: gettext_pl\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: json_rest_api.php:14
+msgid "JSON REST API for Zenphoto"
+msgstr "JSON REST API für Zenphoto"
+
+#: json_rest_api.php:82
+msgid "Image does not exist."
+msgstr "Bild existiert nicht."
+
+#: json_rest_api.php:91
+msgid "Album does not exist."
+msgstr "Album existiert nicht."
+
+#~ msgid "A plugin to add a cookie notify dialog to comply with the EU cookie law and Google's request regarding usages of Google Adwords, Analytics and more"
+#~ msgstr "Ein Plugin für einen Cookie-Hinweis-Dialog, um dem EU Cookie-Gesetz und Googles Anforderung bezüglich der Verwendung von Google Adwords, Analytics und mehr zu entsprechen."
+
+#~ msgid "Button: Agree"
+#~ msgstr "Button: Zustimmen"
+
+#~ msgid "Text used for the dismiss button. Leave empty to use the default text."
+#~ msgstr "Der Text für den Zustimmungsbutton. Leer lassen, um den Standardtext zu verwenden."
+
+#~ msgid "Button: Learn more"
+#~ msgstr "Button: Mehr erfahren"
+
+#~ msgid "Text used for the learn more info button. Leave empty to use the default text."
+#~ msgstr "Der Text für den Link mit mehr Informationen. Leer lassen, um den Standardtext zu verwenden."
+
+#~ msgid "Button: Learn more - Link"
+#~ msgstr "Button: Mehr-erfahren-Link"
+
+#~ msgid "Link to your cookie policy / privacy info page."
+#~ msgstr "Link zu Ihrer Cookie-/Privatspären-Infoseite"
+
+#~ msgid "Message"
+#~ msgstr "Nachricht"
+
+#~ msgid "The message shown by the plugin. Leave empty to use the default text."
+#~ msgstr "Die Nachricht, die vom Plugin angezeigt wird. Leer lassen, um den Standardtext zu verwenden."
+
+#~ msgid "Domain"
+#~ msgstr "Domain"
+
+#~ msgid "The domain for the consent cookie that Cookie Consent uses, to remember that users have consented to cookies. Useful if your website uses multiple subdomains, e.g. if your script is hosted at <code>www.example.com</code> you might override this to <code>example.com</code>, thereby allowing the same consent cookie to be read by subdomains like <code>foo.example.com</code>."
+#~ msgstr "Die Domain für den der Zustimmungscookie, den Cookie Consent verwendet, um zu speichern, dass ein Besucher zugestimmt hat. Nützlich, wenn Ihre Website mehrere subdomains verwendent, z.B. wenn Ihr Skript unter <code>www.example.com</code> platziert ist, möchten Sie vielleicht dies mit <code>example.com</code> übergehen, so dass der Cookie auch für subdomains wie <code>foo.example.com</code> gilt."
+
+#~ msgid "Expire"
+#~ msgstr "Verfall"
+
+#~ msgid "The number of days Cookie Consent should store the user’s consent information for."
+#~ msgstr "Die Anzahl an Tagen, die der Zustimmungscookie gültig sein soll."
+
+#~ msgid "Style"
+#~ msgstr "Aussehen"
+
+#~ msgid "dark-bottom"
+#~ msgstr "Dunkel unten"
+
+#~ msgid "dark-floating-tada"
+#~ msgstr "Dunkel-schwebend-tada"
+
+#~ msgid "dark-floating"
+#~ msgstr "Dunkel-schwebend"
+
+#~ msgid "dark-inline"
+#~ msgstr "dunkel-inline"
+
+#~ msgid "dark-top"
+#~ msgstr "dunkel-oben"
+
+#~ msgid "light-bottom"
+#~ msgstr "hell-unten"
+
+#~ msgid "light-floating"
+#~ msgstr "hell-schwebend"
+
+#~ msgid "light-top"
+#~ msgstr "hell-oben"
+
+#~ msgid "custom"
+#~ msgstr "benutzerdefiniert"
+
+#~ msgid "The style you wish to use. Select <em>custom</em> to use a custom.css file you need to place within <code>zp_cookieconsent/styles/</code>.<p class=\"notebox\"><strong>Notice:</strong> If you select <em>custom</em> and no <code>custom.css</code> file is in place, the banner will not work at all.</p>"
+#~ msgstr "Das Aussehen, das Sie verwenden möchten.  Wählen Sie <em>benutzerdefiniert</em>, um eine custom.css Datei zu verwenden, die Sie innerhalb von   <code>zp_cookieconsent/styles/</code> platzieren müssen.<p class=\"notebox\"><strong>Hinweis:</strong> Wenn Sie <em>benutzerdefiniert</em> auswählen und keine <code>custom.css</code> Datei existiert, funktioniert der Banner nicht.</p>"
+
+#~ msgid "Dismiss on Browse Site"
+#~ msgstr "Ausblenden beim Browsen auf der Website"
+
+#~ msgid "Check to dismiss when users click on internal links."
+#~ msgstr "Wählen Sie dies aus, wenn der Banner ausgeblendet werden soll, wenn Besucher auf interne Links klicken."
+
+#~ msgid "Dismiss on Scroll"
+#~ msgstr "Ausblenden durch Scrollen"
+
+#~ msgid "Check to dismiss when users scroll a page [other than <em>Learn more</em> page]."
+#~ msgstr "Wählen Sie dies, wenn auf der WEbsite scrollen (andere Seiten als die <em>Mehr Information</em>-Seite)"
+
+#~ msgid "Scroll Range"
+#~ msgstr "Scroll-Bereich"
+
+#~ msgid "How many pixels should be scrolled before dismiss."
+#~ msgstr "Wie viele Pixel gescrollt werden soll bevor der Banner ausgeblendet wird."
+
+#~ msgid "This website uses cookies. By continuing to browse the site, you agree to our use of cookies."
+#~ msgstr "Diese Website verwendet Cookies. Wenn Sie die Site weiter verwenden, stimmen Sie unserer Cookienutzung zu."
+
+#~ msgid "Agree"
+#~ msgstr "Einverstanden"
+
+#~ msgid "More info"
+#~ msgstr "Mehr Information"
+
+#~ msgid "Theme"
+#~ msgstr "Theme"
+
+#~ msgid "The theme you wish to use. Select NONE to use your own css via your custom theme for example."
+#~ msgstr "Das zu verwendende Theme. Wählen Sie KEINS, wenn Sie das Aussehen z.B. über Ihr eigenes Theme CSS steuern möchten."
+
+#~ msgid "none"
+#~ msgstr "Keins"
+
+#~ msgid "Dismiss"
+#~ msgstr "Wegtreten"
+
+#~ msgid "Path"
+#~ msgstr "Pfad"
+
+#~ msgid "The path for the consent cookie that Cookie Consent uses, to remember that users have consented to cookies. Use to limit consent to a specific path within your website. If empty the default <code>/</code> is used."
+#~ msgstr "Der PFade für den Zustimmungscookie, den Cookie Consent nutzt, um zu speichern, dass ein Besucher zugestimmt hat. Verwenden sie dies, um die Zustimmung für einen bestimmten Pfad innerhalb Ihrer Website zu begrenzen. Leer lassen, um den Standard <code>/</code> zu verwenden."
