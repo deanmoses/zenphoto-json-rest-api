@@ -368,24 +368,20 @@ class jsonRestApi {
 		$_zp_current_search->setSortDirection('DESC');
 		
 		// add search results that are images
-		$imageResults = array();
-		$images = $_zp_current_search->getImages(self::getCurrentPage());
-		foreach ($images as $image) {
-			$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
-			$imageObject = $_zp_current_search->getImage($imageIndex);
-			$imageResults[] = self::getImageData($imageObject);
+		if ($_zp_current_search->getNumImages() != 0) {
+			$images = $_zp_current_search->getImages(self::getCurrentPage());
+			foreach ($images as $image) {
+				$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
+				$imageObject = $_zp_current_search->getImage($imageIndex);
+				$ret['images'][] = self::getImageData($imageObject);
+			}
 		}
-		if ($imageResults) {
-			$ret['images'] = $imageResults;
-		}
-		
+
 		// add search results that are albums
-		$albumResults = array();
-		while (next_album()) {
-			$albumResults[] = self::getAlbumData($_zp_current_album, true /* thumb only */);
-		}
-		if ($albumResults) {
-			$ret['albums'] = $albumResults;
+		if ($_zp_current_search->getNumAlbums() != 0) {
+			while (next_album()) {
+				$ret['albums'][] = self::getAlbumData($_zp_current_album, true /* thumb only */);
+			}
 		}
 
 		return $ret;
