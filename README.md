@@ -18,8 +18,9 @@ Use "`json=deep`" to return information about all descendant albums.  Otherwise 
 
 Use "`pagination=off`" to return the full unpaginated set of results.  Without this parameter, it will respect Zenphoto's normal pagination.  `pagination` has no effect on images.
 
+## Examples
 Albums:
-* `http://mysite.com/myAlbum/?json` get JSON about myAlbum and its immediate child albums
+* `http://mysite.com/myAlbum/?json` get JSON about myAlbum and the first page of its immediate child albums
 * `http://mysite.com/myAlbum/page/2/?json` get JSON about myAlbum and the second page of its immediate child albums
 * `http://mysite.com/myAlbum/?json=deep` get JSON  about myAlbum and all its descendants
 * `http://mysite.com/myAlbum/?json&pagination=off` get JSON about myAlbum and all its descendants, unpaginated
@@ -28,7 +29,7 @@ Images:
 * `http://mysite.com/myAlbum/myImage.jpg?json` get JSON about myImage.jpg
 
 Search:
-* `http://mysite.com/page/search/train/?json` get JSON search results about 'train'
+* `http://mysite.com/page/search/train/?json` get JSON about the first page of search results about 'train'
 * `http://mysite.com/page/search/train/?json&pagination=off` get JSON search results about 'train', unpaginated
 
 The gallery itself:
