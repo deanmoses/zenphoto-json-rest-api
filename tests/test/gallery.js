@@ -202,6 +202,22 @@ describe("Gallery", function() {
 		});
 
 		/**
+		 * Test that decimal album stat length input is converted to closest int
+		 */
+		suite = new ZenSuite('/?json&popular-albums=2.2');
+		suite.do('Album stat length - decimal input', function() {
+			suite.helpers.isGallery();
+
+			it('Has popular album stats of correct length', function() {
+				var gallery = this.response.body.gallery;
+				should.exist(gallery.stats);
+				should.exist(gallery.stats.album);
+				should.exist(gallery.stats.album.popular);
+			    gallery.stats.album.popular.should.have.length.of(2);
+			});
+		});
+
+		/**
 		 * Test that too large album stat length input is handled
 		 */
 		suite = new ZenSuite('/?json&popular-albums=100');
