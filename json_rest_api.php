@@ -87,6 +87,8 @@ class jsonRestApi {
 		header('Vary: Origin', false /* Allow for multiple Vary headers because other things could be adding a Vary as well. */);
 
 		// the data structure we will return via JSON
+
+
 		$ret = array();
 		if (GALLERY_SECURITY === 'public') {
 			switch ($_zp_gallery_page) {
@@ -373,7 +375,11 @@ class jsonRestApi {
 		// the data structure we will be returning
 		$ret = array();
 
-		if (!ctype_digit($count) || $count > 100) {
+		if (!is_int($count)) {
+			$count = intval($count);
+		}
+
+		if ($count < 1 || $count > 10) {
 			$count = 1;
 		}
 
@@ -402,7 +408,7 @@ class jsonRestApi {
 			// requested.
 			if (isset($_GET[$statTypeQueryParam]) && self::isStatsPluginEnabled($ret)) {
 				$count = sanitize_numeric($_GET[$statTypeQueryParam]);
-				$ret['image_stats'][$statType] = self::getImageStatData($statType, $count, $albumFolder);
+				$ret['stats']['image'][$statType] = self::getImageStatData($statType, $count, $albumFolder);
 			}
 		}
 	}
@@ -418,7 +424,11 @@ class jsonRestApi {
 		// the data structure we will be returning
 		$ret = array();
 
-		if (!ctype_digit($count) || $count > 100) {
+		if (!is_int($count)) {
+			$count = intval($count);
+		}
+
+		if ($count < 1 || $count > 10) {
 			$count = 1;
 		}
 

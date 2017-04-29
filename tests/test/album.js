@@ -84,6 +84,6 @@ describe("Albums", function() {
 			var album = this.response.body.album;
 		    album.images.should.have.length.below(20);
 		});
-	});	
+	});
 
 });
