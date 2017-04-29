@@ -1,5 +1,4 @@
 <?php
-
 /**
  * A JSON REST API for ZenPhoto.
  *
@@ -50,7 +49,7 @@ class jsonRestApi {
 	 * This does not return; it exits Zenphoto.
 	 */
 	static function execute() {
-		global $_zp_gallery, $_zp_current_album, $_zp_current_image, $_zp_current_search;
+		global $_zp_gallery_page, $_zp_gallery, $_zp_current_album, $_zp_current_image, $_zp_current_search;
 
 		header('Content-type: application/json; charset=UTF-8');
 
@@ -87,39 +86,35 @@ class jsonRestApi {
 		// with the appropriate Access-Control-Allow-Origin header set.
 		header('Vary: Origin', false /* Allow for multiple Vary headers because other things could be adding a Vary as well. */);
 
-		$_zp_gallery_page = 'json_rest_api.php';
-
 		// the data structure we will return via JSON
 		$ret = array();
-		
-		// If system is in the context of a search
-		if ($_zp_current_search) {
-			$ret['search'] = self::getSearchData($_zp_current_search);
-		}
-		// Else if system is in the context of an image
-		else if ($_zp_current_image) {
-			if (!$_zp_current_image->exists) {
-				$ret = self::get404Data(gettext_pl('Image does not exist.', 'json_rest_api'));
+		if (GALLERY_SECURITY === 'public') {
+			switch ($_zp_gallery_page) {
+				case 'index.php':
+					if ($_zp_current_album && !$_zp_current_album->exists) {
+						$ret = self::getErrorData(404, gettext_pl('Album does not exist.', 'json_rest_api'));
+					} else {
+						$ret['gallery'] = self::getGalleryData($_zp_gallery);
+					}
+					break;
+				case 'album.php':
+					if ($_zp_current_image && !$_zp_current_image->exists) {
+						$ret = self::getErrorData(404, gettext_pl('Image does not exist.', 'json_rest_api'));
+					} else {
+						$ret['album'] = self::getAlbumData($_zp_current_album);
+					}
+					break;
+				case 'image.php':
+					$ret['image'] = self::getImageData($_zp_current_image, true);
+					break;
+				case 'search.php':
+					$ret['search'] = self::getSearchData($_zp_current_search);
+					break;
 			}
-			else {
-				$ret['image'] = self::getImageData($_zp_current_image, true /* return more image info */);
-			}
+		} else {
+			$ret = self::getErrorData(403, gettext_pl('Access forbidden.', 'json_rest_api'));
 		}
-		// Else if system is in the context of an album
-		else if ($_zp_current_album) {
-			if (!$_zp_current_album->exists) {
-				$ret = self::get404Data(gettext_pl('Album does not exist.', 'json_rest_api'));
-			}
-			else {
-				$ret['album'] = self::getAlbumData($_zp_current_album);
-			}
-		}
-		// Else there's no current search, image or album
-		// Return info about the root albums of the site
-		else {
-			$ret['gallery'] = self::getGalleryData($_zp_gallery);
-		}
-		
+
 		// Return the results to the client in JSON format
 		print(json_encode($ret));
 		exitZP();
@@ -145,7 +140,7 @@ class jsonRestApi {
 	   	$subAlbumNames = $gallery->getAlbums(self::getCurrentPage());
 		if (is_array($subAlbumNames)) {
 			// json=deep means get all descendant albums
-			$shallow = $_GET['json'] !== 'deep';
+			$shallow = sanitize($_GET['json']) !== 'deep';
 
 			$albums = array();
 			foreach ($subAlbumNames as $subAlbumName) {
@@ -164,6 +159,68 @@ class jsonRestApi {
 	}
 
 	/**
+	 * Return array containing every album stat requested on the query string.
+	 *
+	 * @param array $ret the global data structure that will be turned into the JSON response
+	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 * @return JSON-ready array of multiple album stats
+	 */
+	static function addAlbumStats(&$ret, $albumFolder = null) {
+		$statTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'latestupdated', 'random'];
+		foreach ($statTypes as $statType) {
+			$statTypeQueryParam = $statType . '-albums';
+			if (isset($_GET[$statTypeQueryParam])) {
+				$count = sanitize_numeric($_GET[$statTypeQueryParam]);
+				$ret['album_stats'][$statType] = self::getAlbumStatData($statType, $count, $albumFolder);
+			}
+		}
+	}
+
+	/**
+	 * Return array of data for a single album stat.
+	 *
+	 * @param string $statType any of the album stat types defined in the image_album_statistics plugin
+	 * @param int $count number of albums to return
+	 * @return JSON-ready array of albums
+	 */
+	static function getAlbumStatData($statType, $count) {
+		// the data structure we will be returning
+		$ret = array();
+
+		if (!ctype_digit($count) || $count > 100) {
+			$count = 1;
+		}
+
+		// TODO: detect whether the image_album_statistics plugin is enabled
+		require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/image_album_statistics.php');
+		$albums = getAlbumStatistic($count, $statType);
+		if (is_array($albums)) {
+			foreach($albums as $album) {
+				$ret[] = self::getAlbumData($album, true /*thumb only*/);
+			}
+		}
+		return $ret;
+	}
+
+	/**
+	 * Return array containing every image stat requested on the query string.
+	 *
+	 * @param array $ret the global data structure that will be turned into the JSON response
+	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 * @return JSON-ready array of multiple image stats
+	 */
+	static function addImageStats(&$ret, $albumFolder = null) {
+		$statTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'random'];
+		foreach ($statTypes as $statType) {
+			$statTypeQueryParam = $statType . '-images';
+			if (isset($_GET[$statTypeQueryParam])) {
+				$count = sanitize_numeric($_GET[$statTypeQueryParam]);
+				$ret['image_stats'][$statType] = self::getImageStatData($statType, $count, $albumFolder);
+			}
+		}
+	}
+
+	/**
 	 * Return array containing info about an album.
 	 * 
 	 * @param obj $album Album object
@@ -172,9 +229,11 @@ class jsonRestApi {
 	 */
 	static function getAlbumData($album, $thumbOnly = false) {
 		global $_zp_current_image;
-
 		if (!$album) {
 			return;
+		if(!$album->checkAccess()) {
+		}
+			return self::getErrorData(403, gettext_pl('Access forbidden.', 'json_rest_api'));
 		}
 
 		// the data structure we will be returning
@@ -254,6 +313,10 @@ class jsonRestApi {
 	 */
 	static function getImageData($image, $verbose = false) {
 		$ret = array();
+		if(!$image->checkAccess()) {
+			return self::getErrorData(403, gettext_pl('Access forbidden.', 'json_rest_api'));
+		}
+
 		// strip /zenphoto/albums/ so that the image path starts something like myAlbum/...
 		$ret['path'] = str_replace(ALBUMFOLDER, '', $image->getFullImage());
 		self::add($ret, $image, 'getTitle');
@@ -299,40 +362,44 @@ class jsonRestApi {
 		$_zp_current_search->setSortDirection('DESC');
 		
 		// add search results that are images
-		$imageResults = array();
-		$images = $_zp_current_search->getImages(self::getCurrentPage());
-		foreach ($images as $image) {
-			$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
-			$imageObject = $_zp_current_search->getImage($imageIndex);
-			$imageResults[] = self::getImageData($imageObject);
+		if ($_zp_current_search->getNumImages() != 0) {
+			$images = $_zp_current_search->getImages(self::getCurrentPage());
+			foreach ($images as $image) {
+				$imageIndex = $_zp_current_search->getImageIndex($image['folder'], $image['filename']);
+				$imageObject = $_zp_current_search->getImage($imageIndex);
+				$ret['images'][] = self::getImageData($imageObject);
+			}
 		}
-		if ($imageResults) {
-			$ret['images'] = $imageResults;
-		}
-		
+
 		// add search results that are albums
-		$albumResults = array();
-		while (next_album()) {
-			$albumResults[] = self::getAlbumData($_zp_current_album, true /* thumb only */);
-		}
-		if ($albumResults) {
-			$ret['albums'] = $albumResults;
+		if ($_zp_current_search->getNumAlbums() != 0) {
+			while (next_album()) {
+				$ret['albums'][] = self::getAlbumData($_zp_current_album, true /* thumb only */);
+			}
 		}
 
 		return $ret;
 	}
 
 	/**
-	 * Return array with 404 Not Found information
+	 * Return array with error information
 	 * 
 	 * @param string $error_message
 	 * @return JSON-ready array
 	 */
-	static function get404Data($error_message) {
-		http_response_code(404);
+	static function getErrorData($errorcode, $error_message = '') {
 		$ret = array();
+		switch($errorcode) {
+			case 403:
+				http_response_code(403);
+				$ret['status'] = 403;
+				break;
+			case 404:
+				http_response_code(404);
+				$ret['status'] = 404;
+				break;
+		}
 		$ret['error'] = true;
-		$ret['status'] = 404;
 		$ret['message'] = $error_message;
 		return $ret;
 	}
