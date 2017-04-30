@@ -168,14 +168,16 @@ class jsonRestApi {
 	 */
 	static function getAlbumData($album, $thumbOnly = false) {
 		global $_zp_current_image;
+
 		if (!$album) {
 			return;
-		if(!$album->checkAccess()) {
 		}
+
+		if (!$album->checkAccess()) {
 			return self::getErrorData(403, gettext_pl('Access forbidden.', 'json_rest_api'));
 		}
 
-		// the data structure we will be returning as JSON
+		// the data structure we will be returning
 		$ret = array();
 
 		$ret['path'] = $album->name;
@@ -251,10 +253,16 @@ class jsonRestApi {
 	 * @return JSON-ready array
 	 */
 	static function getImageData($image, $verbose = false) {
-		$ret = array();
-		if(!$image->checkAccess()) {
+		if (!$image) {
+			return;
+		}
+
+		if (!$image->checkAccess()) {
 			return self::getErrorData(403, gettext_pl('Access forbidden.', 'json_rest_api'));
 		}
+
+		// the data structure we will be returning
+		$ret = array();
 
 		// strip /zenphoto/albums/ so that the image path starts something like myAlbum/...
 		$ret['path'] = str_replace(ALBUMFOLDER, '', $image->getFullImage());

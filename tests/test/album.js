@@ -86,4 +86,12 @@ describe("Albums", function() {
 		});
 	});
 
+	/**
+	 * Test that an unpublished album gives a 404
+	 */
+	suite = new ZenSuite('/unpublished_album/?json')
+	suite.do('Album - unpublished', function() {
+		suite.helpers.isError(403);
+	});	
+
 });

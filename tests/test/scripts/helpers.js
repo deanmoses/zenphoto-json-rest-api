@@ -22,18 +22,22 @@ exports.is200 = function() {
 };
 
 exports.is404 = function() {
-    it('Is 404', function(done) {
-    	var response = this.response;
+    this.isError(404);
+};
+
+exports.isError = function(errorCode) {
+    it('Is ' + errorCode + ' error', function(done) {
+        var response = this.response;
         response.ok.should.be.false;
         response.error.should.be.not.empty;
         response.clientError.should.be.true;
         response.serverError.should.be.false;
-        response.should.have.status(404);
+        response.should.have.status(errorCode);
         response.statusType.should.equal(4);
         done();
     });
 
-    this.hasVaryHeader();      
+    this.hasVaryHeader();
 };
 
 exports.isJson = function() {
