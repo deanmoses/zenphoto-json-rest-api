@@ -30,19 +30,21 @@ The gallery itself:
 * `http://mysite.com/?json` get JSON about the gallery itself and the top-level albums
 
 ## Pagination
-Use "`pagination=off`" to return the full unpaginated set of results.  Without this parameter, it will respect Zenphoto's normal pagination.  `pagination` has no effect on images.
+Use "`pagination=off`" to return the full unpaginated set of results.  Without this parameter, it will respect Zenphoto's normal pagination.
 
 Albums:
-* `http://mysite.com/myAlbum/?json&pagination=off` get JSON about myAlbum and all its descendants, unpaginated
+* `http://mysite.com/myAlbum/?json&pagination=off` get myAlbum and all its descendants, unpaginated
 
 Search:
-* `http://mysite.com/page/search/train/?json&pagination=off` get JSON search results about 'train', unpaginated
+* `http://mysite.com/page/search/train/?json&pagination=off` get search results about 'train', unpaginated
 
 The gallery itself:
-* `http://mysite.com/?json&pagination=off` get JSON about the gallery itself and the top-level albums, unpaginated
+* `http://mysite.com/?json&pagination=off` get info about the gallery itself and the top-level albums, unpaginated
+
+`pagination` has no effect on images.
 
 ## Depth of album retrieval
-Use the `depth` parameter to control the amount of information retrieved about descendant albums.  Otherwise it will only return information about immediate child albums.  
+Use the `depth` parameter to control the amount of information retrieved about descendant albums.  
 
 Albums
 * `http://mysite.com/myAlbum/?json&depth=0` get thumbnail info about myAlbum
@@ -55,6 +57,8 @@ The gallery itself:
 * `http://mysite.com/?json&depth=1` get thumbnail info about the top-level albums
 * `http://mysite.com/?json&depth=2` get top level albums and thumbnail info about their children
 * `http://mysite.com/?json&depth=-1` get **EVERY ALBUM IN THE SYSTEM**
+
+If `depth` is omitted, it defaults to 1, meaning it returns thumbnail information about immediate child albums.
 
 There is no maximum `depth`.  You can go as deep as you want.
 
