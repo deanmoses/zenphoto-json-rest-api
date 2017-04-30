@@ -87,9 +87,8 @@ class jsonRestApi {
 		header('Vary: Origin', false /* Allow for multiple Vary headers because other things could be adding a Vary as well. */);
 
 		// the data structure we will return via JSON
-
-
 		$ret = array();
+
 		if (GALLERY_SECURITY === 'public') {
 			switch ($_zp_gallery_page) {
 				case 'index.php':
@@ -176,7 +175,7 @@ class jsonRestApi {
 			return self::getErrorData(403, gettext_pl('Access forbidden.', 'json_rest_api'));
 		}
 
-		// the data structure we will be returning
+		// the data structure we will be returning as JSON
 		$ret = array();
 
 		$ret['path'] = $album->name;
