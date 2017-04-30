@@ -450,7 +450,11 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Return whether the stats plugin is enabled.  If not, add error message to $ret.
+	 * Return true/false whether the stats plugin is enabled.  
+	 *
+	 * Additionally, if this is the FIRST time this method is called, either:
+	 * 1) require_once() the stats plugin to make its functions available, or
+	 * 2) add an error message to $ret saying that the stats plugin is disabled.
 	 *
 	 * @param array $ret the main JSON-ready array
 	 * @return boolean
@@ -458,12 +462,12 @@ class jsonRestApi {
 	static function isStatsPluginEnabled(&$ret) {
 		if (self::$statsPluginEnabled === null) {
 			self::$statsPluginEnabled = extensionEnabled(self::$statsPluginName);
-			if (!self::$statsPluginEnabled) {
-				$errorMessage = gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName;
-				$ret['stats']['error'] = $errorMessage;
+			if (self::$statsPluginEnabled) {
+				require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/' . self::$statsPluginName . '.php');
 			}
 			else {
-				require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/' . self::$statsPluginName . '.php');
+				$errorMessage = gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName;
+				$ret['stats']['error'] = $errorMessage;
 			}
 		}
 		return self::$statsPluginEnabled;
