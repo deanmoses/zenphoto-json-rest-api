@@ -9,9 +9,10 @@ These tests run on Node.js.
 1.  Get this project from GitHub
 1.  Install the REST API plugin into Zenphoto. You can copy or symlink it.
 1.  Enable the album_image_statistics plugin.
-1.  Set up the test data by making `tests/testdata/albums` the Zenphoto albums directory. It must *replace* the root album folder. You can copy or symlink it.
-   1. From the Zenphoto admin console, unpublish the album 'unpublished_album'
-   2. From the Zenphoto admin console, unpublish the image 'unpublished_image/unpublished.jpg'
+1.  Set up the test data
+    1. Make `tests/testdata/albums` the Zenphoto albums directory. It must *replace* the root album folder. You can copy or symlink it.
+    1. From the Zenphoto admin console, unpublish the album 'unpublished_album'
+    1. From the Zenphoto admin console, unpublish the image 'unpublished_image/unpublished.jpg'
 1.  Then:
 ```
 cd [PROJECT ROOT]/tests
