@@ -96,14 +96,14 @@ class jsonRestApi {
 					if ($_zp_current_album && !$_zp_current_album->exists) {
 						$ret = self::getErrorData(404, gettext_pl('Album does not exist.', 'json_rest_api'));
 					} else {
-						$ret['gallery'] = self::getGalleryData($_zp_gallery);
+						$ret['gallery'] = self::getGalleryData($_zp_gallery, self::getDepth());
 					}
 					break;
 				case 'album.php':
 					if ($_zp_current_image && !$_zp_current_image->exists) {
 						$ret = self::getErrorData(404, gettext_pl('Image does not exist.', 'json_rest_api'));
 					} else {
-						$ret['album'] = self::getAlbumData($_zp_current_album);
+						$ret['album'] = self::getAlbumData($_zp_current_album, self::getDepth());
 					}
 					break;
 				case 'image.php':
@@ -128,7 +128,7 @@ class jsonRestApi {
 	 * @param obj $gallery Gallery object
 	 * @return JSON-ready array
 	 */
-	static function getGalleryData($gallery) {
+	static function getGalleryData($gallery, $depth = 1) {
 		// the data structure we will be returning
 		$ret = array();
 
@@ -138,19 +138,24 @@ class jsonRestApi {
 		$ret['image_size'] = (int) getOption('image_size');
 		$ret['thumb_size'] = (int) getOption('thumb_size');
 
-		// For each top-level album
-	   	$subAlbumNames = $gallery->getAlbums(self::getCurrentPage());
-		if (is_array($subAlbumNames)) {
-			// json=deep means get all descendant albums
-			$shallow = sanitize($_GET['json']) !== 'deep';
+		// $depth = 0 means stop, we don't want subalbums
+		if ($depth !== 0) {
+			// if $depth is -1 leave it at -1 (infinite subalbums).  Otherwise it's greater than zero, decrement it.
+			$newDepth = ($depth < 0) ? $depth : $depth -1;
 
-			$albums = array();
-			foreach ($subAlbumNames as $subAlbumName) {
-				$subalbum = newAlbum($subAlbumName, $gallery);
-				$albums[] = self::getAlbumData($subalbum, $shallow);
-			}
-			if ($albums) {
-				$ret['albums'] = $albums;
+			// For each top-level album
+		   	$subAlbumNames = $gallery->getAlbums(self::getCurrentPage());
+			if (is_array($subAlbumNames)) {
+				
+
+				$albums = array();
+				foreach ($subAlbumNames as $subAlbumName) {
+					$subalbum = newAlbum($subAlbumName, $gallery);
+					$albums[] = self::getAlbumData($subalbum, $newDepth);
+				}
+				if ($albums) {
+					$ret['albums'] = $albums;
+				}
 			}
 		}
 
@@ -164,10 +169,14 @@ class jsonRestApi {
 	 * Return array containing info about an album.
 	 * 
 	 * @param obj $album Album object
-	 * @param boolean $thumbOnly true: only return enough info to render this album's thumbnail
+	 * @param int $depth the depth of subalbums to get.
+	 *			 2: get this album, immediate subalbums, and thumbnails of the subalbum's immediate subalbums
+	 *			 1: get this album and the thumbnails of subalbums (DEFAULT)
+	 *			 0: get just the thumbnail information about this album (no images or albums)
+	 *			-1: get all albums (infinite depth)
 	 * @return JSON-ready array
 	 */
-	static function getAlbumData($album, $thumbOnly = false) {
+	static function getAlbumData($album, $depth = 1) {
 		global $_zp_current_image;
 
 		if (!$album) {
@@ -200,15 +209,16 @@ class jsonRestApi {
 			$ret['url_thumb'] = $thumbImage->getThumb();
 		}
 
-		if (!$thumbOnly) {
-			// json=deep means get all descendant albums
-			$shallow = $_GET['json'] !== 'deep';
+		// $depth = 0 means stop, we just want the thumb info for this album
+		if ($depth !== 0) {
+			// if $depth is -1 leave it at -1 (infinite subalbums).  Otherwise it's greater than zero, decrement it.
+			$newDepth = ($depth < 0) ? $depth : $depth -1;
 
 			// Add info about this albums' subalbums
 			$albums = array();
 			foreach ($album->getAlbums(self::getCurrentPage()) as $folder) {
 				$subalbum = newAlbum($folder);
-				$albums[] = self::getAlbumData($subalbum, $shallow);
+				$albums[] = self::getAlbumData($subalbum, $newDepth);
 			}
 			if ($albums) {
 				$ret['albums'] = $albums;
@@ -225,19 +235,19 @@ class jsonRestApi {
 			}
 			
 			// Add info about parent album
-			$parentAlbum = self::getAlbumData($album->getParent(), true /*thumb only*/);
+			$parentAlbum = self::getAlbumData($album->getParent(), 0 /*thumb only*/);
 			if ($parentAlbum) {
 				$ret['parent_album'] = $parentAlbum; // would like to use 'parent' but that's a reserved word in javascript
 			}
 			
 			// Add info about next album
-			$nextAlbum = self::getAlbumData($album->getNextAlbum(), true /*thumb only*/);
+			$nextAlbum = self::getAlbumData($album->getNextAlbum(), 0 /*thumb only*/);
 			if ($nextAlbum) {
 				$ret['next'] = $nextAlbum;
 			}
 			
 			// Add info about prev album
-			$prevAlbum = self::getAlbumData($album->getPrevAlbum(), true /*thumb only*/);
+			$prevAlbum = self::getAlbumData($album->getPrevAlbum(), 0 /*thumb only*/);
 			if ($prevAlbum) {
 				$ret['prev'] = $prevAlbum;
 			}
@@ -322,7 +332,7 @@ class jsonRestApi {
 		// add search results that are albums
 		if ($_zp_current_search->getNumAlbums() != 0) {
 			while (next_album()) {
-				$ret['albums'][] = self::getAlbumData($_zp_current_album, true /* thumb only */);
+				$ret['albums'][] = self::getAlbumData($_zp_current_album, 0 /* thumb only */);
 			}
 		}
 
@@ -394,7 +404,7 @@ class jsonRestApi {
 		$albums = getAlbumStatistic($count, $statType);
 		if (is_array($albums)) {
 			foreach($albums as $album) {
-				$ret[] = self::getAlbumData($album, true /*thumb only*/);
+				$ret[] = self::getAlbumData($album, 0 /*thumb only*/);
 			}
 		}
 
@@ -513,6 +523,16 @@ class jsonRestApi {
 	static function dateToTimestamp($dateString) {
 		$a = strptime($dateString, '%Y-%m-%d %H:%M:%S'); //format:  2014-11-24 01:40:22
 		return (int) mktime($a['tm_hour'], $a['tm_min'], $a['tm_sec'], $a['tm_mon']+1, $a['tm_mday'], $a['tm_year']+1900);
+	}
+
+	/**
+	 * Get the value of the depth query string parameter, or the default depth.
+	 * @return integer
+	 */
+	static function getDepth() {
+		return (isset($_GET['depth']))
+			? intval(sanitize_numeric($_GET['depth']))
+			: 1; // default depth.  Means get the album + thumbs of immediate subalbums
 	}
 }
 ?>

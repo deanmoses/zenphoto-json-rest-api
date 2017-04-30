@@ -14,33 +14,53 @@ PHP 5.4+ required.
 2. Activate the plugin from your Zenphoto administration panel, under the *Plugins -> Development* tab
     
 ## Usage
-Use your normal gallery URLs but add a query string parameter named "`json`" to get a JSON representation.  This works for albums, images and search results.
+Use your normal gallery URLs but add a query string parameter named "`json`" to get a JSON representation.
 
-Use "`json=deep`" to return information about all descendant albums.  Otherwise it will only return information about immediate child albums.  `deep` has no effect on images and searches.
-
-Use "`pagination=off`" to return the full unpaginated set of results.  Without this parameter, it will respect Zenphoto's normal pagination.  `pagination` has no effect on images.
-
-## Examples
 Albums:
 * `http://mysite.com/myAlbum/?json` get JSON about myAlbum and the first page of its immediate child albums
 * `http://mysite.com/myAlbum/page/2/?json` get JSON about myAlbum and the second page of its immediate child albums
-* `http://mysite.com/myAlbum/?json=deep` get JSON  about myAlbum and all its descendants
-* `http://mysite.com/myAlbum/?json&pagination=off` get JSON about myAlbum and all its descendants, unpaginated
 
 Images:
 * `http://mysite.com/myAlbum/myImage.jpg?json` get JSON about myImage.jpg
 
 Search:
 * `http://mysite.com/page/search/train/?json` get JSON about the first page of search results about 'train'
-* `http://mysite.com/page/search/train/?json&pagination=off` get JSON search results about 'train', unpaginated
 
 The gallery itself:
 * `http://mysite.com/?json` get JSON about the gallery itself and the top-level albums
-* `http://mysite.com/?json=deep` get JSON about the gallery itself and **EVERY ALBUM IN THE SYSTEM**
+
+## Pagination
+Use "`pagination=off`" to return the full unpaginated set of results.  Without this parameter, it will respect Zenphoto's normal pagination.  `pagination` has no effect on images.
+
+Albums:
+* `http://mysite.com/myAlbum/?json&pagination=off` get JSON about myAlbum and all its descendants, unpaginated
+
+Search:
+* `http://mysite.com/page/search/train/?json&pagination=off` get JSON search results about 'train', unpaginated
+
+The gallery itself:
 * `http://mysite.com/?json&pagination=off` get JSON about the gallery itself and the top-level albums, unpaginated
 
-## Watch out for `json=deep`
-It can be very expensive to get a giant set of nested albums.  I can't call this on my *own* root gallery of about 1000 albums and 25000 images because it times out.
+## Depth of album retrieval
+Use the `depth` parameter to control the amount of information retrieved about descendant albums.  Otherwise it will only return information about immediate child albums.  
+
+Albums
+* `http://mysite.com/myAlbum/?json&depth=0` get thumbnail info about myAlbum
+* `http://mysite.com/myAlbum/?json&depth=1` get myAlbum and thumbnail info about its immediate subalbums
+* `http://mysite.com/myAlbum/?json&depth=2` get myAlbum, its immediate subalbums, and thumbnail info about the subalbums' immediate subalbums
+* `http://mysite.com/myAlbum/?json&depth=-1` get full information about myAlbum and all its descendants
+
+The gallery itself:
+* `http://mysite.com/?json&depth=0` get basic info about the gallery, but no albums
+* `http://mysite.com/?json&depth=1` get thumbnail info about the top-level albums
+* `http://mysite.com/?json&depth=2` get top level albums and thumbnail info about their children
+* `http://mysite.com/?json&depth=-1` get **EVERY ALBUM IN THE SYSTEM**
+
+There is no maximum `depth`.  You can go as deep as you want.
+
+Use `depth` carefully!  It can be very expensive to get a giant set of nested albums.  I can't call this on my *own* root gallery of about 1000 albums and 25000 images because it times out.
+
+`depth` has no effect on images and searches.
 
 ## Statistics
 If you have enabled the image_album_statistics plugin (it's included with Zenphoto), when you get your root gallery you can also retrieve various statistics about it.  Examples:
