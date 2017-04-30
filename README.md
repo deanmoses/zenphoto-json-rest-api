@@ -7,6 +7,8 @@ It's useful for building mobile apps and javascript-heavy web apps on top of Zen
 
 The API is read-only; it cannot create or modify albums or images.
 
+PHP 5.4+ required.
+
 ## Installation
 1. Place `json_rest_api.php` and the folder `json_rest_api` in the `/plugins` folder of your Zenphoto installation
 2. Activate the plugin from your Zenphoto administration panel, under the *Plugins -> Development* tab

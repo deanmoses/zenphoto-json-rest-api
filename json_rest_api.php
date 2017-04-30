@@ -13,6 +13,7 @@ $plugin_is_filter = 900 | FEATURE_PLUGIN;
 $plugin_description = gettext_pl('JSON REST API for Zenphoto', 'json_rest_api');
 $plugin_author = 'Dean Moses (deanmoses)';
 $plugin_version = '0.3.0';
+$plugin_disable = (version_compare(PHP_VERSION, '5.4') >= 0) ? false : gettext_pl('zenphoto-json-rest-api requires PHP 5.4 or greater.', 'json_rest_api');
 $plugin_URL = 'https://github.com/deanmoses/zenphoto-json-rest-api';
 
 // Handle REST API calls before anything else
