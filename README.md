@@ -50,10 +50,10 @@ The gallery itself:
 Use the `depth` parameter to control the amount of information retrieved about descendant albums.  
 
 Albums
-* `http://mysite.com/myAlbum/?json&depth=0` get thumbnail info about myAlbum
+* `http://mysite.com/myAlbum/?json&depth=0` get thumbnail info about myAlbum (no images, no subalbums)
 * `http://mysite.com/myAlbum/?json&depth=1` get myAlbum and thumbnail info about its immediate subalbums
 * `http://mysite.com/myAlbum/?json&depth=2` get myAlbum, its immediate subalbums, and thumbnail info about the subalbums' immediate subalbums
-* `http://mysite.com/myAlbum/?json&depth=-1` get full information about myAlbum and all its descendants
+* `http://mysite.com/myAlbum/?json&depth=-1` get full information about myAlbum and **ALL** its descendants
 
 The gallery itself:
 * `http://mysite.com/?json&depth=0` get basic info about the gallery, but no albums
