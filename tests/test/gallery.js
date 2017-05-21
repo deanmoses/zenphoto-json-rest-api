@@ -11,14 +11,32 @@ var should = chai.should();
 
 var ZenSuite = require('./scripts/zen_suite.js');
 
-describe("Gallery", function() {
+describe('Gallery', function() {
 	var suite;
 
 	/**
-	 * Test gallery shallow.
+	 * Test gallery depth = 0
 	 */
-	suite = new ZenSuite('/?json');
-	suite.do('Gallery - shallow', function() {
+	suite = new ZenSuite('/?json&depth=0');
+	suite.do('Gallery - depth 0 (no subalbums)', function() {
+		suite.helpers.isGallery();
+
+		it('Has no subalbums', function() {
+			var gallery = this.response.body.gallery;
+			should.not.exist(gallery.albums);
+		});
+
+		it('Has no images', function() {
+			var gallery = this.response.body.gallery;
+			should.not.exist(gallery.images);
+		});
+	});
+
+	/**
+	 * Test gallery depth = 1
+	 */
+	suite = new ZenSuite('/?json&depth=1');
+	suite.do('Gallery - depth 1 (just thumbs of subalbums)', function() {
 		suite.helpers.isGallery();
 
 		it('Has at least 2 subalbums', function() {
@@ -34,29 +52,90 @@ describe("Gallery", function() {
 		it('First subalbum has no subalbums', function() {
 			var gallery = this.response.body.gallery;
 			should.not.exist(gallery.albums[0].albums);
-		});		
+		});
 	});
 
 	/**
-	 * Test gallery deep.
+	 * Test gallery depth = 1 by not having a depth parameter
 	 */
-	suite = new ZenSuite('/?json=deep');
-	suite.do('Gallery - deep', function() {
+	suite = new ZenSuite('/?json');
+	suite.do('Gallery - depth 1 - default, no depth param', function() {
 		suite.helpers.isGallery();
 
-		it('First subalbum has at least two images', function() {
+		it('Has at least 2 subalbums', function() {
+			var gallery = this.response.body.gallery;
+		    gallery.albums.should.have.length.above(1);
+		});
+
+		it('Has no images', function() {
+			var gallery = this.response.body.gallery;
+			should.not.exist(gallery.images);
+		});
+
+		it('First subalbum has no subalbums', function() {
+			var gallery = this.response.body.gallery;
+			should.not.exist(gallery.albums[0].albums);
+		});
+	});
+
+	/**
+	 * Test gallery depth = 2
+	 */
+	suite = new ZenSuite('/?json&depth=2');
+	suite.do('Gallery - depth 2', function() {
+		suite.helpers.isGallery();
+
+		it('Subalbum has at least two images', function() {
 			var gallery = this.response.body.gallery;
 		    gallery.albums[0].images.should.have.length.above(1);
 		});
 
-		it('First subalbum has at least one sub-subalbum', function() {
+		it('Subalbum has at least one subalbum', function() {
 			var gallery = this.response.body.gallery;
 		    gallery.albums[0].albums.should.have.length.above(0);
 		});
 
-		it('First sub-subalbum has at least two images', function() {
+		it('Sub-subalbum images are not returned', function() {
+			var gallery = this.response.body.gallery;
+		    should.not.exist(gallery.albums[0].albums[0].images);
+		});
+
+		it('Sub-subalbum subalbums are not returned', function() {
+			var gallery = this.response.body.gallery;
+		    should.not.exist(gallery.albums[0].albums[0].albums);
+		});
+	});
+
+	/**
+	 * Test gallery infinite depth.
+	 */
+	suite = new ZenSuite('/?json&depth=-1');
+	suite.do('Gallery - depth -1 (infinite)', function() {
+		suite.helpers.isGallery();
+
+		it('Subalbum has at least two images', function() {
+			var gallery = this.response.body.gallery;
+		    gallery.albums[0].images.should.have.length.above(1);
+		});
+
+		it('Subalbum has at least one subalbum', function() {
+			var gallery = this.response.body.gallery;
+		    gallery.albums[0].albums.should.have.length.above(0);
+		});
+
+		it('Sub-subalbum has at least two images', function() {
 			var gallery = this.response.body.gallery;
 		    gallery.albums[0].albums[0].images.should.have.length.above(1);
+		});
+
+		it('Sub-subalbum has at least one subalbum', function() {
+			var gallery = this.response.body.gallery;
+		    gallery.albums[0].albums[0].albums.should.have.length.above(0);
+		});
+
+		it('Sub-sub-subalbum has at least two images', function() {
+			var gallery = this.response.body.gallery;
+		    gallery.albums[0].albums[0].albums[0].images.should.have.length.above(1);
 		});
 	});
 
@@ -85,7 +164,6 @@ describe("Gallery", function() {
 				should.not.exist(gallery.stats.image);
 			});
 		});
-
 
 		/**
 		 * Test multiple album stats with non-default lengths

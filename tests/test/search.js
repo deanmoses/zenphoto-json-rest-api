@@ -11,7 +11,7 @@ var should = chai.should();
 
 var ZenSuite = require('./scripts/zen_suite.js');
 
-describe("Search", function() {
+describe('Search', function() {
 	var suite;
 
 	describe('Search - unpaginated', function() {
@@ -63,7 +63,7 @@ describe("Search", function() {
 		 * Test that the first page of search results returns exactly the page limit of images.
 		 */
 		suite = new ZenSuite('/page/search/san francisco/?json')
-		suite.do('Album - first page', function() {
+		suite.do('Search - first page', function() {
 			suite.helpers.isSearch();
 
 			it('Has full page of images', function() {
@@ -76,7 +76,7 @@ describe("Search", function() {
 		 * Test that the last page of search results returns less than the page limit of images.
 		 */
 		suite = new ZenSuite('/page/search/san francisco/3/?json')
-		suite.do('Album - last page', function() {
+		suite.do('Search - last page', function() {
 			suite.helpers.isSearch();
 
 			it('Does not have full page of images', function() {
@@ -84,6 +84,27 @@ describe("Search", function() {
 			    search.images.should.have.length.below(20);
 			});
 		});	
+	});
+
+	describe('Search - depth', function() {
+
+		/**
+		 * Test that search ignores the depth parameter
+		 */
+		suite = new ZenSuite('/page/search/album1/?json&depth=-1')
+		suite.do('Search - ignores depth -1', function() {
+			suite.helpers.isSearch();
+
+			it('First album result does not have subalbums', function() {
+				var search = this.response.body.search;
+			    should.not.exist(search.albums[0].albums);
+			});
+
+			it('First album result does not have images', function() {
+				var search = this.response.body.search;
+			    should.not.exist(search.albums[0].images);
+			});
+		});
 	});
 });
 

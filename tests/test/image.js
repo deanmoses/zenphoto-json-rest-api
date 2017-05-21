@@ -6,7 +6,7 @@
 
 var ZenSuite = require('./scripts/zen_suite.js');
 
-describe("Images", function() {
+describe('Images', function() {
 	var suite;
 
 	/**

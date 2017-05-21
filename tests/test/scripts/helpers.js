@@ -225,7 +225,7 @@ exports.isGallery = function() {
                         "type": "array"
                     }
                 },
-                "required": ["title", "desc", "image_size", "thumb_size", "albums"]                    
+                "required": ["title", "desc", "image_size", "thumb_size"]             
             }
         );
         done();
