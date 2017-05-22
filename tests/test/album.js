@@ -171,6 +171,113 @@ describe('Albums', function() {
 	suite = new ZenSuite('/unpublished_album/?json')
 	suite.do('Album - unpublished', function() {
 		suite.helpers.isError(403);
-	});	
+	});
+
+	/**
+	 * Test album stats.
+	 */
+	describe('Stats', function() {
+
+		/**
+		 * Test multiple album stats with non-default lengths
+		 */
+		suite = new ZenSuite('/album1/?json&latest_mtime_albums=count:2&latest_date_albums=count:3,deep:true');
+		suite.do('Multiple album stats with non-default lengths', function() {
+			suite.helpers.isAlbum();
+
+			it('Has latest_mtime album stats of correct length', function() {
+				var album = this.response.body.album;
+				should.exist(album.stats);
+				should.exist(album.stats.album);
+				should.exist(album.stats.album.latest_mtime);
+			    album.stats.album.latest_mtime.should.have.length.of(2);
+			});
+
+			it('Has latest_date album stats of correct length', function() {
+				var album = this.response.body.album;
+				should.exist(album.stats.album.latest_date);
+			    album.stats.album.latest_date.should.have.length.of(3);
+			});
+
+			it('Does not have any image stats', function() {
+				var album = this.response.body.album;
+				should.not.exist(album.stats.image);
+			});
+		});
+
+		/**
+		 * Test album stat with deep:false (default, not specified)
+		 */
+		suite = new ZenSuite('/album1/?json&latest_albums');
+		suite.do('Album stat deep:false (default, not specified)', function() {
+			suite.helpers.isAlbum();
+
+			it('Has latest album stats', function() {
+				var album = this.response.body.album;
+				should.exist(album.stats);
+				should.exist(album.stats.album);
+				should.exist(album.stats.album.latest);
+			    album.stats.album.latest.should.have.length.of(1);
+			});
+
+			it('Latest album is a direct child', function() {
+				var album = this.response.body.album;
+				var latestAlbum = album.stats.album.latest[0];
+			    // because deep=false, the album *must* be a direct child of album1
+			    var numSlashes = (latestAlbum.path.match(/\//g) || []).length;
+			    numSlashes.should.equal(1);
+			});
+		});
+
+		/**
+		 * Test album stat with deep:false
+		 */
+		suite = new ZenSuite('/album1?json&latest_albums=deep:false');
+		suite.do('Album stat deep:false', function() {
+			suite.helpers.isAlbum();
+
+			it('Has latest album stats', function() {
+				var album = this.response.body.album;
+				should.exist(album.stats);
+				should.exist(album.stats.album);
+				should.exist(album.stats.album.latest);
+			    album.stats.album.latest.should.have.length.of(1);
+			});
+
+			it('Latest album is a direct child', function() {
+				var album = this.response.body.album;
+				var latestAlbum = album.stats.album.latest[0];
+			    // because deep=false, the album *must* be a direct child of album1
+			    var numSlashes = (latestAlbum.path.match(/\//g) || []).length;
+			    numSlashes.should.equal(1);
+			});
+		});
+
+		/**
+		 * Test album stat with deep:true
+		 */
+		suite = new ZenSuite('/album1?json&latest_albums=deep:true');
+		suite.do('Album stat deep:true', function() {
+			suite.helpers.isAlbum();
+
+			it('Has latest album stats', function() {
+				var album = this.response.body.album;
+				should.exist(album.stats);
+				should.exist(album.stats.album);
+				should.exist(album.stats.album.latest);
+			    album.stats.album.latest.should.have.length.of(1);
+			});
+
+			it('Latest album is not a direct child', function() {
+				var album = this.response.body.album;
+				var latestAlbum = album.stats.album.latest[0];
+			    // because deep=true the album will be one of the deeper albums and not a direct child
+			    var numSlashes = (latestAlbum.path.match(/\//g) || []).length;
+			    numSlashes.should.be.at.least(2);
+			});
+		});
+
+
+	});
 
 });
