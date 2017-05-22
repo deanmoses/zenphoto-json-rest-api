@@ -71,10 +71,10 @@ Use `depth` carefully!  It can be very expensive to get a giant set of nested al
 
 ## Statistics
 If you have enabled the image_album_statistics plugin (it's included with Zenphoto), when you get your root gallery you can also retrieve various statistics about it.  Examples:
-* `http://mysite.com/myAlbum/?json&latest-albums` get the latest album in your gallery
-* `http://mysite.com/myAlbum/?json&latest-albums&latest-images` get the latest album and the latest image
-* `http://mysite.com/myAlbum/?json&latest-albums=3` get the 3 latest albums
-* `http://mysite.com/myAlbum/?json&latest-albums=3&latest-images=4` get the 3 latest albums and 4 latest images
+* `http://mysite.com/?json&latest-albums` get the latest album in your gallery
+* `http://mysite.com/?json&latest-albums&latest-images` get the latest album and the latest image
+* `http://mysite.com/?json&latest-albums=3` get the 3 latest albums
+* `http://mysite.com/?json&latest-albums=3&latest-images=4` get the 3 latest albums and 4 latest images
 
 Supports the following stats:
 * Albums
