@@ -45,6 +45,11 @@ class jsonRestApi {
 	static $imageStatTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'random'];
 
 	/**
+	 * Error string that system can check for to know stats plugin not available.
+	 */
+	static $statsPluginErrorToken = 'stats_plugin_not_enabled';
+
+	/**
 	 * Respond to the request with JSON rather than the normal HTML.
 	 *
 	 * This does not return; it exits Zenphoto.
@@ -104,6 +109,7 @@ class jsonRestApi {
 						$ret = self::getErrorData(404, gettext_pl('Image does not exist.', 'json_rest_api'));
 					} else {
 						$ret['album'] = self::getAlbumData($_zp_current_album, self::getDepth());
+						self::addStats($ret, $_zp_current_album->getFolder());
 					}
 					break;
 				case 'image.php':
@@ -159,8 +165,7 @@ class jsonRestApi {
 			}
 		}
 
-		self::addAlbumStats($ret);
-		self::addImageStats($ret);
+		self::addStats($ret);
 		
 		return $ret;
 	}
@@ -275,8 +280,7 @@ class jsonRestApi {
 		// the data structure we will be returning
 		$ret = array();
 
-		// strip /zenphoto/albums/ so that the image path starts something like myAlbum/...
-		$ret['path'] = str_replace(ALBUMFOLDER, '', $image->getFullImage());
+		$ret['path'] = $path = $image->getAlbumName() . '/' . $image->getFileName();
 		self::add($ret, $image, 'getTitle');
 		self::add($ret, $image, 'getDesc');
 		$ret['date'] = self::dateToTimestamp($image->getDateTime());
@@ -363,23 +367,55 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Add every album stat requested on the query string into $ret.
+	 * Add all album and image stats requested on the query string.
 	 *
-	 * @param array $ret the global data structure that will be turned into the JSON response
-	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 * @param array $ret the array that will eventually be converted into JSON
+	 * @param string $albumFolder optional name of an album to only get the stats for its direct subalbums
 	 */
-	static function addAlbumStats(&$ret, $albumFolder = null) {
-		foreach (self::$albumStatTypes as $statType) {
-			$statTypeQueryParam = $statType . '-albums';
-			// The order of isset(GET) and isStatsPluginEnabled is important: 
-			// isStatsPluginEnabled may write an error message into $ret and
-			// we only want it to be written if at least one stat was actually
-			// requested.
-			if (isset($_GET[$statTypeQueryParam]) && self::isStatsPluginEnabled($ret)) {
-				$count = sanitize_numeric($_GET[$statTypeQueryParam]);
-				$ret['stats']['album'][$statType] = self::getAlbumStatData($statType, $count, $albumFolder);
+	static function addStats(&$ret, $albumFolder = null) {
+		try {
+			$albumStats = self::getAlbumStats($albumFolder);
+			if ($albumStats) {
+				$ret['stats']['album'] = $albumStats;
+			}
+			$imageStats = self::getImageStats($albumFolder);
+			if ($imageStats) {
+				$ret['stats']['image'] = $imageStats;
+			}
+		} catch(Exception $e) {
+			if ($e === self::$statsPluginErrorToken) {
+				$errorMessage = gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName;
+				$ret['stats']['error'] = $errorMessage;
+			}
+			else {
+				// Don't know what the exception is, can't handle it
+				throw $e;
 			}
 		}
+	}
+
+	/**
+	 * Return every album stat requested on the query string.
+	 *
+	 * @param string $albumFolder optional name of an album to only get the stats for its direct subalbums
+	 * @return JSON-ready array
+	 */
+	static function getAlbumStats($albumFolder = null) {
+		// the data structure we will be returning
+		$ret = array();
+
+		foreach (self::$albumStatTypes as $statType) {
+			$statTypeQueryParam = $statType . '-albums';
+			if (isset($_GET[$statTypeQueryParam])) {
+				if (!self::isStatsPluginEnabled()) {
+					throw new Exception(self::$statsPluginErrorToken);
+				}
+				$count = sanitize_numeric($_GET[$statTypeQueryParam]);
+				$ret[$statType] = self::getAlbumStatData($statType, $count, $albumFolder);
+			}
+		}
+
+		return $ret;
 	}
 
 	/**
@@ -387,9 +423,10 @@ class jsonRestApi {
 	 *
 	 * @param string $statType any of the album stat types defined in the stats plugin
 	 * @param int $count number of albums to return
+	 * @param string $albumFolder optional name of an album to only get the stats for its direct subalbums
 	 * @return JSON-ready array of albums
 	 */
-	static function getAlbumStatData($statType, $count) {
+	static function getAlbumStatData($statType, $count = 1, $albumFolder = null) {
 		// the data structure we will be returning
 		$ret = array();
 
@@ -401,7 +438,7 @@ class jsonRestApi {
 			$count = 1;
 		}
 
-		$albums = getAlbumStatistic($count, $statType);
+		$albums = getAlbumStatistic($count, $statType, $albumFolder);
 		if (is_array($albums)) {
 			foreach($albums as $album) {
 				$ret[] = self::getAlbumData($album, 0 /*thumb only*/);
@@ -412,23 +449,27 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Add every image stat requested on the query string to $ret.
+	 * Return every image stat requested on the query string.
 	 *
-	 * @param array $ret the global data structure that will be turned into the JSON response
 	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 * @return JSON-ready array of albums
 	 */
-	static function addImageStats(&$ret, $albumFolder = null) {
+	static function getImageStats($albumFolder = null) {
+		// the data structure we will be returning
+		$ret = array();
+
 		foreach (self::$imageStatTypes as $statType) {
 			$statTypeQueryParam = $statType . '-images';
-			// The order of isset(GET) and isStatsPluginEnabled is important: 
-			// isStatsPluginEnabled may write an error message into $ret and
-			// we only want it to be written if at least one stat was actually
-			// requested.
-			if (isset($_GET[$statTypeQueryParam]) && self::isStatsPluginEnabled($ret)) {
+			if (isset($_GET[$statTypeQueryParam])) {
+				if (!self::isStatsPluginEnabled()) {
+					throw new Exception(self::$statsPluginErrorToken);
+				}
 				$count = sanitize_numeric($_GET[$statTypeQueryParam]);
-				$ret['stats']['image'][$statType] = self::getImageStatData($statType, $count, $albumFolder);
+				$ret[$statType] = self::getImageStatData($statType, $count, $albumFolder);
 			}
 		}
+
+		return $ret;
 	}
 
 	/**
@@ -436,9 +477,10 @@ class jsonRestApi {
 	 *
 	 * @param string $statType any of the image stat types defined in the image_album_statistics plugin
 	 * @param int $count number of images to return
+	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
 	 * @return JSON-ready array of images
 	 */
-	static function getImageStatData($statType, $count) {
+	static function getImageStatData($statType, $count = 1, $albumFolder = null) {
 		// the data structure we will be returning
 		$ret = array();
 
@@ -450,7 +492,7 @@ class jsonRestApi {
 			$count = 1;
 		}
 
-		$images = getImageStatistic($count, $statType);
+		$images = getImageStatistic($count, $statType, $albumFolder);
 		if (is_array($images)) {
 			foreach($images as $image) {
 				$ret[] = self::getImageData($image);
@@ -462,22 +504,16 @@ class jsonRestApi {
 	/**
 	 * Return true/false whether the stats plugin is enabled.  
 	 *
-	 * Additionally, if this is the FIRST time this method is called, either:
-	 * 1) require_once() the stats plugin to make its functions available, or
-	 * 2) add an error message to $ret saying that the stats plugin is disabled.
+	 * Additionally, if this is the FIRST time this method is called, 
+	 * require_once() the stats plugin to make its functions available.
 	 *
-	 * @param array $ret the main JSON-ready array
 	 * @return boolean
 	 */
-	static function isStatsPluginEnabled(&$ret) {
+	static function isStatsPluginEnabled() {
 		if (self::$statsPluginEnabled === null) {
 			self::$statsPluginEnabled = extensionEnabled(self::$statsPluginName);
 			if (self::$statsPluginEnabled) {
 				require_once(SERVERPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER . '/' . self::$statsPluginName . '.php');
-			}
-			else {
-				$errorMessage = gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName;
-				$ret['stats']['error'] = $errorMessage;
 			}
 		}
 		return self::$statsPluginEnabled;

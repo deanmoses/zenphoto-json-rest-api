@@ -70,11 +70,16 @@ Use `depth` carefully!  It can be very expensive to get a giant set of nested al
 `depth` has no effect on images and searches.
 
 ## Statistics
-If you have enabled the image_album_statistics plugin (it's included with Zenphoto), when you get your root gallery you can also retrieve various statistics about it.  Examples:
+If you have enabled the image_album_statistics plugin (it's included with Zenphoto), you can retrieve various statistics about your overall gallery or specific albums.
+
+The gallery itself:
 * `http://mysite.com/?json&latest-albums` get the latest album in your gallery
 * `http://mysite.com/?json&latest-albums&latest-images` get the latest album and the latest image
 * `http://mysite.com/?json&latest-albums=3` get the 3 latest albums
 * `http://mysite.com/?json&latest-albums=3&latest-images=4` get the 3 latest albums and 4 latest images
+
+Albums:
+* `http://mysite.com/myAlbum/?json&latest-albums&latest-images` get myAlbum's latest immediate subalbum and the latest image directly in the album
 
 Supports the following stats:
 * Albums
@@ -82,7 +87,7 @@ Supports the following stats:
 * Images
   * popular-images, latest-images, latest-date-images, latest-mtime-images, latest-publishdate-images, mostrated-images, toprated-images, random-images
 
-This currently only works for the top-level gallery.  It's a future enhancement to make it work for specific albums.
+Statistics can only be collected on gallery and album requests; they cannot be collected on image and search requests.
 
 ## Localization
 If your Zenphoto is in multilingual mode, you can access language-specific content:
