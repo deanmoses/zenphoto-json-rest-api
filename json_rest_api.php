@@ -45,11 +45,6 @@ class jsonRestApi {
 	static $imageStatTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'random'];
 
 	/**
-	 * Error string that system can check for to know stats plugin not available.
-	 */
-	static $statsPluginErrorToken = 'stats_plugin_not_enabled';
-
-	/**
 	 * Respond to the request with JSON rather than the normal HTML.
 	 *
 	 * This does not return; it exits Zenphoto.
@@ -383,14 +378,7 @@ class jsonRestApi {
 				$ret['stats']['image'] = $imageStats;
 			}
 		} catch(Exception $e) {
-			if ($e === self::$statsPluginErrorToken) {
-				$errorMessage = gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName;
-				$ret['stats']['error'] = $errorMessage;
-			}
-			else {
-				// Don't know what the exception is, can't handle it
-				throw $e;
-			}
+			$ret['stats']['error'] = $e->getMessage();
 		}
 	}
 
@@ -408,10 +396,16 @@ class jsonRestApi {
 			$statTypeQueryParam = $statType . '-albums';
 			if (isset($_GET[$statTypeQueryParam])) {
 				if (!self::isStatsPluginEnabled()) {
-					throw new Exception(self::$statsPluginErrorToken);
+					throw new Exception(gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName);
 				}
-				$count = sanitize_numeric($_GET[$statTypeQueryParam]);
-				$ret[$statType] = self::getAlbumStatData($statType, $count, $albumFolder);
+
+				$statParams = self::parseStatParameters($_GET[$statTypeQueryParam]);
+
+				$ret[$statType] = self::getAlbumStatData($statType, $albumFolder,
+					$statParams['count'],
+					$statParams['threshold'],
+					$statParams['sort'],
+					$statParams['deep']);
 			}
 		}
 
@@ -422,11 +416,14 @@ class jsonRestApi {
 	 * Return array of data for a single album stat.
 	 *
 	 * @param string $statType any of the album stat types defined in the stats plugin
-	 * @param int $count number of albums to return
 	 * @param string $albumFolder optional name of an album to only get the stats for its direct subalbums
+	 * @param int $count number of albums to return
+	 * @param int threshold the minimum number of ratings (for rating options) or hits (for popular option) an album must have to be included in the list.
+	 * @param string $sortdirection 'desc' or 'asc'
+	 * @param boolean $deep true for statistics to include all subalbum levels
 	 * @return JSON-ready array of albums
 	 */
-	static function getAlbumStatData($statType, $count = 1, $albumFolder = null) {
+	static function getAlbumStatData($statType, $albumFolder = null, $count = 1, $threshold, $sortdirection, $deep) {
 		// the data structure we will be returning
 		$ret = array();
 
@@ -438,7 +435,7 @@ class jsonRestApi {
 			$count = 1;
 		}
 
-		$albums = getAlbumStatistic($count, $statType, $albumFolder);
+		$albums = getAlbumStatistic($count, $statType, $albumFolder, $threshold, $sortdirection, $deep);
 		if (is_array($albums)) {
 			foreach($albums as $album) {
 				$ret[] = self::getAlbumData($album, 0 /*thumb only*/);
@@ -462,10 +459,16 @@ class jsonRestApi {
 			$statTypeQueryParam = $statType . '-images';
 			if (isset($_GET[$statTypeQueryParam])) {
 				if (!self::isStatsPluginEnabled()) {
-					throw new Exception(self::$statsPluginErrorToken);
+					throw new Exception(gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName);
 				}
-				$count = sanitize_numeric($_GET[$statTypeQueryParam]);
-				$ret[$statType] = self::getImageStatData($statType, $count, $albumFolder);
+
+				$statParams = self::parseStatParameters($_GET[$statTypeQueryParam]);
+
+				$ret[$statType] = self::getImageStatData($statType, $albumFolder,
+					$statParams['count'],
+					$statParams['threshold'],
+					$statParams['sort'],
+					$statParams['deep']);
 			}
 		}
 
@@ -476,11 +479,14 @@ class jsonRestApi {
 	 * Return array of data for a single image stat.
 	 *
 	 * @param string $statType any of the image stat types defined in the image_album_statistics plugin
-	 * @param int $count number of images to return
 	 * @param string $albumFolder optional name of an album to get only the stats for its direct subalbums
+	 * @param int $count number of images to return
+	 * @param int threshold the minimum number of ratings (for rating options) or hits (for popular option) an image must have to be included in the list.
+	 * @param string $sortdirection 'desc' or 'asc'
+	 * @param boolean $deep true for statistics to include all subalbum levels
 	 * @return JSON-ready array of images
 	 */
-	static function getImageStatData($statType, $count = 1, $albumFolder = null) {
+	static function getImageStatData($statType, $albumFolder = null, $count = 1, $threshold, $sortdirection, $deep) {
 		// the data structure we will be returning
 		$ret = array();
 
@@ -492,7 +498,7 @@ class jsonRestApi {
 			$count = 1;
 		}
 
-		$images = getImageStatistic($count, $statType, $albumFolder);
+		$images = getImageStatistic($count, $statType, $albumFolder, $deep, $threshold, $sortdirection);
 		if (is_array($images)) {
 			foreach($images as $image) {
 				$ret[] = self::getImageData($image);
@@ -517,6 +523,41 @@ class jsonRestApi {
 			}
 		}
 		return self::$statsPluginEnabled;
+	}
+
+	/**
+	 * @param string $statParam like 'count:4,threshold:2,sort:asc,deep'
+	 *
+	 */
+	static function parseStatParameters($statParams) {
+
+		// extract name value pairs from $statParams
+		$pairs = array();
+		if ($statParams) {
+			// split something like 'count:4,threshold:2,sort:asc,deep' into individual parameters like 'count:4'
+			$params = explode(',', $statParams);
+			// split each individual parameter like 'count:4' into a name value pair
+			foreach ($params as $param) {
+				$pair = explode(':', $param);
+				if (count($pair) < 2) {
+					throw new Exception("Invalid query string: stat parameter '$param' is missing a semicolon");
+				}
+				else if (count($pair) > 2) {
+					throw new Exception("Invalid query string: stat parameter '$param' has too many semicolons");
+				}
+				$pairs[strtolower(trim($pair[0]))] = strtolower(trim($pair[1]));
+			}
+		}
+
+		// data structure to return
+		$parsedParams = array();
+
+		$parsedParams['count'] = isset($pairs['count']) ? sanitize_numeric($pairs['count']) : null;
+		$parsedParams['threshold'] = isset($pairs['threshold']) ? sanitize_numeric($pairs['threshold']) : null;
+		$parsedParams['sort'] = isset($pairs['sort']) ? sanitize($pairs['sort']) : null;
+		$parsedParams['deep'] = isset($pairs['deep']) ? sanitize($pairs['deep']) === 'true' : false;
+
+		return $parsedParams;
 	}
 
 	/**

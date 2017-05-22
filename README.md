@@ -49,7 +49,7 @@ The gallery itself:
 ## Depth of album retrieval
 Use the `depth` parameter to control the amount of information retrieved about descendant albums.  
 
-Albums
+Albums:
 * `http://mysite.com/myAlbum/?json&depth=0` get thumbnail info about myAlbum (no images, no subalbums)
 * `http://mysite.com/myAlbum/?json&depth=1` get myAlbum and thumbnail info about its immediate subalbums
 * `http://mysite.com/myAlbum/?json&depth=2` get myAlbum, its immediate subalbums, and thumbnail info about the subalbums' immediate subalbums
@@ -75,17 +75,30 @@ If you have enabled the image_album_statistics plugin (it's included with Zenpho
 The gallery itself:
 * `http://mysite.com/?json&latest-albums` get the latest album in your gallery
 * `http://mysite.com/?json&latest-albums&latest-images` get the latest album and the latest image
-* `http://mysite.com/?json&latest-albums=3` get the 3 latest albums
-* `http://mysite.com/?json&latest-albums=3&latest-images=4` get the 3 latest albums and 4 latest images
 
 Albums:
-* `http://mysite.com/myAlbum/?json&latest-albums&latest-images` get myAlbum's latest immediate subalbum and the latest image directly in the album
+* `http://mysite.com/myAlbum/?json&latest-albums` get myAlbum's latest subalbum
 
 Supports the following stats:
 * Albums
   * popular-albums, latest-albums, latest-date-albums, latest-mtime-albums, latest-publishdate-albums, mostrated-albums, toprated-albums, latestupdated-albums, random-albums
 * Images
   * popular-images, latest-images, latest-date-images, latest-mtime-images, latest-publishdate-images, mostrated-images, toprated-images, random-images
+
+Supports the following parameters:
+* `count` The number of albums or images to return.  Defaults to 1.
+* `threshold` The minimum number of ratings (for rating options) or hits (for popular option) an album must have to be included in the list. Defaults to 0.
+* `sort` Takes either `asc` or `desc`.  Whether to return items in ascending or descending order (e.g., most to least hits or least to most)  Defaults to descending.
+* `deep` This only applies when getting albums, not the overall gallery.  When `true` the stats will be measured across all descendant albums.  Otherwise it will only measure the stats on the specific named album: image stats will only include images in the album and album stats will only include immedate child albums.  Defaults to false.
+
+Examples:
+* `http://mysite.com/?json&latest-albums=count:3` get the 3 latest albums
+* `http://mysite.com/?json&popular-albums=threshold:2` get the most popular subalbum, must have at least 2 views
+* `http://mysite.com/?json&latest-albums=sort:asc` get the oldest album in the gallery
+* `http://mysite.com/myAlbum/?json&latest-albums=deep:true` get the newest album at any depth under myAlbum
+
+Join parameters with commas:
+* `http://mysite.com/?json&popular-albums=count:3,sort:asc,threshold:2` get the 3 least popular albums that have been viewed at least twice 
 
 Statistics can only be collected on gallery and album requests; they cannot be collected on image and search requests.
 
