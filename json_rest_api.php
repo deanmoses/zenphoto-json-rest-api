@@ -571,10 +571,11 @@ class jsonRestApi {
 					}
 				}
 				else if ($name === 'deep') {
-					$parsedParams['deep'] = sanitize($value);
-					if (!in_array($parsedParams['deep'], array('true','false'))) {
+					$value = sanitize($value);
+					if (!in_array($value, array('true','false'))) {
 						self::throw_qs('stat parameter is not "true" or "false"', $param);
 					}
+					$parsedParams['deep'] = $value === 'true';
 				}
 				else {
 					self::throw_qs('unrecognized stat parameter', $name);
