@@ -147,7 +147,7 @@ describe('Gallery', function() {
 		/**
 		 * Test a single album stat
 		 */
-		suite = new ZenSuite('/?json&popular-albums');
+		suite = new ZenSuite('/?json&popular_albums');
 		suite.do('Single album stat', function() {
 			suite.helpers.isGallery();
 
@@ -168,7 +168,7 @@ describe('Gallery', function() {
 		/**
 		 * Test multiple album stats with non-default lengths
 		 */
-		suite = new ZenSuite('/?json&popular-albums=count:2&latest-albums=count:3');
+		suite = new ZenSuite('/?json&popular_albums=count:2&latest_albums=count:3');
 		suite.do('Multiple album stats with non-default lengths', function() {
 			suite.helpers.isGallery();
 
@@ -195,7 +195,7 @@ describe('Gallery', function() {
 		/**
 		 * Test a multiple image stats with non-default lengths
 		 */
-		suite = new ZenSuite('/?json&popular-images=count:2&latest-images=count:3');
+		suite = new ZenSuite('/?json&popular_images=count:2&latest_images=count:3');
 		suite.do('Multiple image stats with non-default lengths', function() {
 			suite.helpers.isGallery();
 
@@ -222,7 +222,7 @@ describe('Gallery', function() {
 		/**
 		 * Test a single image stat
 		 */
-		suite = new ZenSuite('/?json&popular-images');
+		suite = new ZenSuite('/?json&popular_images');
 		suite.do('Single image stat', function() {
 			suite.helpers.isGallery();
 
@@ -243,7 +243,7 @@ describe('Gallery', function() {
 		/**
 		 * Test both an album and an image stat together.
 		 */
-		suite = new ZenSuite('/?json&popular-albums&popular-images');
+		suite = new ZenSuite('/?json&popular_albums&popular_images');
 		suite.do('Both an album and an image stat', function() {
 			suite.helpers.isGallery();
 
@@ -266,7 +266,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that bad album stat parameter is handled
 		 */
-		suite = new ZenSuite('/?json&popular-albums=BAD_INPUT');
+		suite = new ZenSuite('/?json&popular_albums=BAD_INPUT');
 		suite.do('Album stat - completely bad input', function() {
 			suite.helpers.isGallery();
 
@@ -284,7 +284,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that bad album stat parameter is handled
 		 */
-		suite = new ZenSuite('/?json&popular-albums=count:1:');
+		suite = new ZenSuite('/?json&popular_albums=count:1:');
 		suite.do('Album stat - too many colons', function() {
 			suite.helpers.isGallery();
 
@@ -301,7 +301,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that bad album stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-albums=count:BAD_INPUT');
+		suite = new ZenSuite('/?json&popular_albums=count:BAD_INPUT');
 		suite.do('Album stat length - bad input', function() {
 			suite.helpers.isGallery();
 
@@ -319,7 +319,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that decimal album stat length input is converted to closest int
 		 */
-		suite = new ZenSuite('/?json&popular-albums=count:2.2');
+		suite = new ZenSuite('/?json&popular_albums=count:2.2');
 		suite.do('Album stat length - decimal input', function() {
 			suite.helpers.isGallery();
 
@@ -335,7 +335,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that too large album stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-albums=count:100');
+		suite = new ZenSuite('/?json&popular_albums=count:100');
 		suite.do('Album stat length - too long', function() {
 			suite.helpers.isGallery();
 
@@ -351,7 +351,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that too short album stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-albums=count:0');
+		suite = new ZenSuite('/?json&popular_albums=count:0');
 		suite.do('Album stat length - too short', function() {
 			suite.helpers.isGallery();
 
@@ -367,7 +367,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that bad image stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=count:BAD_INPUT');
+		suite = new ZenSuite('/?json&popular_images=count:BAD_INPUT');
 		suite.do('Image stat length - bad input', function() {
 			suite.helpers.isGallery();
 
@@ -385,7 +385,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that bad image stat threshold input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=threshold:BAD_INPUT');
+		suite = new ZenSuite('/?json&popular_images=threshold:BAD_INPUT');
 		suite.do('Image stat threshold - bad input', function() {
 			suite.helpers.isGallery();
 
@@ -403,7 +403,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that bad image stat deep input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=deep:BAD_INPUT');
+		suite = new ZenSuite('/?json&popular_images=deep:BAD_INPUT');
 		suite.do('Image stat deep - bad input', function() {
 			suite.helpers.isGallery();
 
@@ -421,7 +421,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that bad image stat sort input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=sort:BAD_INPUT');
+		suite = new ZenSuite('/?json&popular_images=sort:BAD_INPUT');
 		suite.do('Image stat sort - bad input', function() {
 			suite.helpers.isGallery();
 
@@ -439,7 +439,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that too large image stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=count:100');
+		suite = new ZenSuite('/?json&popular_images=count:100');
 		suite.do('Image stat length - too long', function() {
 			suite.helpers.isGallery();
 
@@ -455,7 +455,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that too short image stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=count:0');
+		suite = new ZenSuite('/?json&popular_images=count:0');
 		suite.do('Image stat length - too short', function() {
 			suite.helpers.isGallery();
 
