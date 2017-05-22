@@ -206,6 +206,50 @@ describe('Albums', function() {
 		});
 
 		/**
+		 * Test image stat without an album stat
+		 */
+		suite = new ZenSuite('/album1/?json&latest_publishdate_images=count:2');
+		suite.do('Image stat, no album stats', function() {
+			suite.helpers.isAlbum();
+
+			it('Has latest_publishdate image stats of correct length', function() {
+				var album = this.response.body.album;
+				should.exist(album.stats);
+				should.exist(album.stats.image);
+				should.exist(album.stats.image.latest_publishdate);
+			    album.stats.image.latest_publishdate.should.have.length.of(2);
+			});
+
+			it('Does not have any album stats', function() {
+				var album = this.response.body.album;
+				should.not.exist(album.stats.album);
+			});
+		});
+
+		/**
+		 * Test both an album and an image stat together.
+		 */
+		suite = new ZenSuite('/album1/?json&latest_publishdate_albums&latest_mtime_images');
+		suite.do('Both an album and an image stat', function() {
+			suite.helpers.isAlbum();
+
+			it('Has latest_publishdate album stats', function() {
+				var album = this.response.body.album;
+				should.exist(album.stats);
+				should.exist(album.stats.album);
+				should.exist(album.stats.album.latest_publishdate);
+			    album.stats.album.latest_publishdate.should.have.length.of(1);
+			});
+
+			it('Has latest_mtime image stats', function() {
+				var album = this.response.body.album;
+				should.exist(album.stats.image);
+				should.exist(album.stats.image.latest_mtime);
+			    album.stats.image.latest_mtime.should.have.length.of(1);
+			});
+		});
+
+		/**
 		 * Test album stat with deep:false (default, not specified)
 		 */
 		suite = new ZenSuite('/album1/?json&latest_albums');
