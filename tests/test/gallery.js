@@ -168,7 +168,7 @@ describe('Gallery', function() {
 		/**
 		 * Test multiple album stats with non-default lengths
 		 */
-		suite = new ZenSuite('/?json&popular-albums=2&latest-albums=3');
+		suite = new ZenSuite('/?json&popular-albums=count:2&latest-albums=count:3');
 		suite.do('Multiple album stats with non-default lengths', function() {
 			suite.helpers.isGallery();
 
@@ -195,7 +195,7 @@ describe('Gallery', function() {
 		/**
 		 * Test a multiple image stats with non-default lengths
 		 */
-		suite = new ZenSuite('/?json&popular-images=2&latest-images=3');
+		suite = new ZenSuite('/?json&popular-images=count:2&latest-images=count:3');
 		suite.do('Multiple image stats with non-default lengths', function() {
 			suite.helpers.isGallery();
 
@@ -264,25 +264,62 @@ describe('Gallery', function() {
 		});
 
 		/**
-		 * Test that bad album stat length input is handled
+		 * Test that bad album stat parameter is handled
 		 */
 		suite = new ZenSuite('/?json&popular-albums=BAD_INPUT');
+		suite.do('Album stat - completely bad input', function() {
+			suite.helpers.isGallery();
+
+			it('Returns error message', function() {
+				var gallery = this.response.body.gallery;
+				should.exist(gallery.stats);
+				should.exist(gallery.stats.error);
+				gallery.stats.error.should.include('BAD_INPUT');
+				gallery.stats.error.should.include('missing a colon');
+				should.not.exist(gallery.stats.album);
+				should.not.exist(gallery.stats.image);
+			});
+		});
+
+		/**
+		 * Test that bad album stat parameter is handled
+		 */
+		suite = new ZenSuite('/?json&popular-albums=count:1:');
+		suite.do('Album stat - too many colons', function() {
+			suite.helpers.isGallery();
+
+			it('Has error message', function() {
+				var gallery = this.response.body.gallery;
+				should.exist(gallery.stats);
+				should.exist(gallery.stats.error);
+				gallery.stats.error.should.include('too many colons');
+				should.not.exist(gallery.stats.album);
+				should.not.exist(gallery.stats.image);
+			});
+		});
+
+		/**
+		 * Test that bad album stat length input is handled
+		 */
+		suite = new ZenSuite('/?json&popular-albums=count:BAD_INPUT');
 		suite.do('Album stat length - bad input', function() {
 			suite.helpers.isGallery();
 
-			it('Has popular album stats of default length', function() {
+			it('Has error message', function() {
 				var gallery = this.response.body.gallery;
 				should.exist(gallery.stats);
-				should.exist(gallery.stats.album);
-				should.exist(gallery.stats.album.popular);
-			    gallery.stats.album.popular.should.have.length.of(1);
+				should.exist(gallery.stats.error);
+				gallery.stats.error.should.include('BAD_INPUT');
+				gallery.stats.error.should.include('not numeric');
+				should.not.exist(gallery.stats.album);
+				should.not.exist(gallery.stats.image);
 			});
 		});
 
 		/**
 		 * Test that decimal album stat length input is converted to closest int
 		 */
-		suite = new ZenSuite('/?json&popular-albums=2.2');
+		suite = new ZenSuite('/?json&popular-albums=count:2.2');
 		suite.do('Album stat length - decimal input', function() {
 			suite.helpers.isGallery();
 
@@ -298,7 +335,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that too large album stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-albums=100');
+		suite = new ZenSuite('/?json&popular-albums=count:100');
 		suite.do('Album stat length - too long', function() {
 			suite.helpers.isGallery();
 
@@ -314,7 +351,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that too short album stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-albums=0');
+		suite = new ZenSuite('/?json&popular-albums=count:0');
 		suite.do('Album stat length - too short', function() {
 			suite.helpers.isGallery();
 
@@ -330,23 +367,79 @@ describe('Gallery', function() {
 		/**
 		 * Test that bad image stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=BAD_INPUT');
+		suite = new ZenSuite('/?json&popular-images=count:BAD_INPUT');
 		suite.do('Image stat length - bad input', function() {
 			suite.helpers.isGallery();
 
-			it('Has popular image stats of default length', function() {
+			it('Has error message', function() {
 				var gallery = this.response.body.gallery;
 				should.exist(gallery.stats);
-				should.exist(gallery.stats.image);
-				should.exist(gallery.stats.image.popular);
-			    gallery.stats.image.popular.should.have.length.of(1);
+				should.exist(gallery.stats.error);
+				gallery.stats.error.should.include('BAD_INPUT');
+				gallery.stats.error.should.include('not numeric');
+				should.not.exist(gallery.stats.image);
+				should.not.exist(gallery.stats.album);
+			});
+		});
+
+		/**
+		 * Test that bad image stat threshold input is handled
+		 */
+		suite = new ZenSuite('/?json&popular-images=threshold:BAD_INPUT');
+		suite.do('Image stat threshold - bad input', function() {
+			suite.helpers.isGallery();
+
+			it('Has error message', function() {
+				var gallery = this.response.body.gallery;
+				should.exist(gallery.stats);
+				should.exist(gallery.stats.error);
+				gallery.stats.error.should.include('BAD_INPUT');
+				gallery.stats.error.should.include('not numeric');
+				should.not.exist(gallery.stats.image);
+				should.not.exist(gallery.stats.album);
+			});
+		});
+
+		/**
+		 * Test that bad image stat deep input is handled
+		 */
+		suite = new ZenSuite('/?json&popular-images=deep:BAD_INPUT');
+		suite.do('Image stat deep - bad input', function() {
+			suite.helpers.isGallery();
+
+			it('Has error message', function() {
+				var gallery = this.response.body.gallery;
+				should.exist(gallery.stats);
+				should.exist(gallery.stats.error);
+				gallery.stats.error.should.include('BAD_INPUT');
+				gallery.stats.error.should.include('true');
+				should.not.exist(gallery.stats.image);
+				should.not.exist(gallery.stats.album);
+			});
+		});
+
+		/**
+		 * Test that bad image stat sort input is handled
+		 */
+		suite = new ZenSuite('/?json&popular-images=sort:BAD_INPUT');
+		suite.do('Image stat sort - bad input', function() {
+			suite.helpers.isGallery();
+
+			it('Has error message', function() {
+				var gallery = this.response.body.gallery;
+				should.exist(gallery.stats);
+				should.exist(gallery.stats.error);
+				gallery.stats.error.should.include('BAD_INPUT');
+				gallery.stats.error.should.include('asc');
+				should.not.exist(gallery.stats.image);
+				should.not.exist(gallery.stats.album);
 			});
 		});
 
 		/**
 		 * Test that too large image stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=100');
+		suite = new ZenSuite('/?json&popular-images=count:100');
 		suite.do('Image stat length - too long', function() {
 			suite.helpers.isGallery();
 
@@ -362,7 +455,7 @@ describe('Gallery', function() {
 		/**
 		 * Test that too short image stat length input is handled
 		 */
-		suite = new ZenSuite('/?json&popular-images=0');
+		suite = new ZenSuite('/?json&popular-images=count:0');
 		suite.do('Image stat length - too short', function() {
 			suite.helpers.isGallery();
 
