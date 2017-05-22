@@ -104,7 +104,7 @@ class jsonRestApi {
 						$ret = self::getErrorData(404, gettext_pl('Image does not exist.', 'json_rest_api'));
 					} else {
 						$ret['album'] = self::getAlbumData($_zp_current_album, self::getDepth());
-						self::addStats($ret, $_zp_current_album->getFolder());
+						self::addStats($ret['album'], $_zp_current_album->getFolder());
 					}
 					break;
 				case 'image.php':
@@ -526,13 +526,16 @@ class jsonRestApi {
 	}
 
 	/**
-	 * @param string $statParam like 'count:4,threshold:2,sort:asc,deep'
+	 * Parse the parameters for a single stat on the query string, like
+	 * latest_albums=count:4,threshold:2,sort:asc,deep:true
 	 *
+	 * @param string $statParam like 'count:4,threshold:2,sort:asc,deep:true'
+	 * @return array of parsed stat parameters
 	 */
 	static function parseStatParameters($statParams) {
+		// data structure to return
+		$parsedParams = array();
 
-		// extract name value pairs from $statParams
-		$pairs = array();
 		if ($statParams) {
 			// split something like 'count:4,threshold:2,sort:asc,deep' into individual parameters like 'count:4'
 			$params = explode(',', $statParams);
@@ -540,24 +543,64 @@ class jsonRestApi {
 			foreach ($params as $param) {
 				$pair = explode(':', $param);
 				if (count($pair) < 2) {
-					throw new Exception("Invalid query string: stat parameter '$param' is missing a semicolon");
+					self::throw_qs('stat parameter is missing a colon', $param);
 				}
 				else if (count($pair) > 2) {
-					throw new Exception("Invalid query string: stat parameter '$param' has too many semicolons");
+					self::throw_qs('stat parameter has too many colons', $param);
 				}
-				$pairs[strtolower(trim($pair[0]))] = strtolower(trim($pair[1]));
+
+				$name = strtolower(trim($pair[0]));
+				$value = strtolower(trim($pair[1]));
+
+				if ($name === 'count') {
+					if (!is_numeric($value)) {
+						self::throw_qs('stat parameter "count" is not numeric', $param);
+					}
+					$parsedParams['count'] = sanitize_numeric($value);
+				}
+				else if ($name === 'threshold') {
+					if (!is_numeric($value)) {
+						self::throw_qs('stat parameter "threshold" is not numeric', $param);
+					}
+					$parsedParams['threshold'] = sanitize_numeric($value);
+				}
+				else if ($name === 'sort') {
+					$parsedParams['sort'] = sanitize($value);
+					if (!in_array($parsedParams['sort'], array('asc','desc'))) {
+						self::throw_qs('stat parameter is not "asc" or "desc"', $param);
+					}
+				}
+				else if ($name === 'deep') {
+					$parsedParams['deep'] = sanitize($value);
+					if (!in_array($parsedParams['deep'], array('true','false'))) {
+						self::throw_qs('stat parameter is not "true" or "false"', $param);
+					}
+				}
+				else {
+					self::throw_qs('unrecognized stat parameter', $name);
+				}
 			}
 		}
 
-		// data structure to return
-		$parsedParams = array();
-
-		$parsedParams['count'] = isset($pairs['count']) ? sanitize_numeric($pairs['count']) : null;
-		$parsedParams['threshold'] = isset($pairs['threshold']) ? sanitize_numeric($pairs['threshold']) : null;
-		$parsedParams['sort'] = isset($pairs['sort']) ? sanitize($pairs['sort']) : null;
-		$parsedParams['deep'] = isset($pairs['deep']) ? sanitize($pairs['deep']) === 'true' : false;
+		// Ensure there's a default value for each key.  Otherwise we get a PHP warning when accessed.
+		if (!isset($parsedParams['count'])) $parsedParams['count'] = null;
+		if (!isset($parsedParams['threshold'])) $parsedParams['threshold'] = null;
+		if (!isset($parsedParams['sort'])) $parsedParams['sort'] = null;
+		if (!isset($parsedParams['deep'])) $parsedParams['deep'] = false;
 
 		return $parsedParams;
+	}
+
+	/**
+	 * Throw a localized error message about the query string format
+	 *
+	 * @param string $message to be localized
+	 * @param string $param to be appended after localized message.
+	 */
+	static function throw_qs($message, $param) {
+		$msgStart = gettext_pl('Invalid query string', 'json_rest_api');
+		$msgBody = gettext_pl($message, 'json_rest_api');
+		throw new Exception("$msgStart: $msgBody: \"$param\"");
 	}
 
 	/**
