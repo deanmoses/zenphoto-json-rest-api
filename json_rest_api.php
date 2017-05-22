@@ -37,12 +37,12 @@ class jsonRestApi {
 	/**
 	 * The types of album stats available in the stats plugin.
 	 */
-	static $albumStatTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'latestupdated', 'random'];
+	static $albumStatTypes = ['popular', 'latest', 'latest_date', 'latest_mtime', 'latest_publishdate', 'mostrated', 'toprated', 'latestupdated', 'random'];
 
 	/**
 	 * The types of image stats available in the stats plugin.
 	 */
-	static $imageStatTypes = ['popular', 'latest', 'latest-date', 'latest-mtime', 'latest-publishdate', 'mostrated', 'toprated', 'random'];
+	static $imageStatTypes = ['popular', 'latest', 'latest_date', 'latest_mtime', 'latest_publishdate', 'mostrated', 'toprated', 'random'];
 
 	/**
 	 * Respond to the request with JSON rather than the normal HTML.
@@ -393,7 +393,7 @@ class jsonRestApi {
 		$ret = array();
 
 		foreach (self::$albumStatTypes as $statType) {
-			$statTypeQueryParam = $statType . '-albums';
+			$statTypeQueryParam = $statType . '_albums';
 			if (isset($_GET[$statTypeQueryParam])) {
 				if (!self::isStatsPluginEnabled()) {
 					throw new Exception(gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName);
@@ -401,7 +401,9 @@ class jsonRestApi {
 
 				$statParams = self::parseStatParameters($_GET[$statTypeQueryParam]);
 
-				$ret[$statType] = self::getAlbumStatData($statType, $albumFolder,
+				$ret[$statType] = self::getAlbumStatData(
+					str_replace('_', '-', $statType), // the stat function takes things like 'latest-mtime' but since that's not a valid javascript variable, I use 'latest_mtime' everywhere else
+					$albumFolder,
 					$statParams['count'],
 					$statParams['threshold'],
 					$statParams['sort'],
@@ -456,7 +458,7 @@ class jsonRestApi {
 		$ret = array();
 
 		foreach (self::$imageStatTypes as $statType) {
-			$statTypeQueryParam = $statType . '-images';
+			$statTypeQueryParam = $statType . '_images';
 			if (isset($_GET[$statTypeQueryParam])) {
 				if (!self::isStatsPluginEnabled()) {
 					throw new Exception(gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName);
@@ -464,7 +466,9 @@ class jsonRestApi {
 
 				$statParams = self::parseStatParameters($_GET[$statTypeQueryParam]);
 
-				$ret[$statType] = self::getImageStatData($statType, $albumFolder,
+				$ret[$statType] = self::getImageStatData(
+					str_replace('_', '-', $statType), // the stat function takes things like 'latest-mtime' but since that's not a valid javascript variable, I use 'latest_mtime' everywhere else
+					$albumFolder,
 					$statParams['count'],
 					$statParams['threshold'],
 					$statParams['sort'],

@@ -73,17 +73,17 @@ Use `depth` carefully!  It can be very expensive to get a giant set of nested al
 If you have enabled the image_album_statistics plugin (it's included with Zenphoto), you can retrieve various statistics about your overall gallery or specific albums.
 
 The gallery itself:
-* `http://mysite.com/?json&latest-albums` get the latest album in your gallery
-* `http://mysite.com/?json&latest-albums&latest-images` get the latest album and the latest image
+* `http://mysite.com/?json&latest_albums` get the latest album in your gallery
+* `http://mysite.com/?json&latest_albums&latest_images` get the latest album and the latest image
 
 Albums:
-* `http://mysite.com/myAlbum/?json&latest-albums` get myAlbum's latest subalbum
+* `http://mysite.com/myAlbum/?json&latest_albums` get myAlbum's latest subalbum
 
 Supports the following stats:
 * Albums
-  * popular-albums, latest-albums, latest-date-albums, latest-mtime-albums, latest-publishdate-albums, mostrated-albums, toprated-albums, latestupdated-albums, random-albums
+  * popular_albums, latest_albums, latest_date_albums, latest_mtime_albums, latest_publishdate_albums, mostrated_albums, toprated_albums, latestupdated_albums, random_albums
 * Images
-  * popular-images, latest-images, latest-date-images, latest-mtime-images, latest-publishdate-images, mostrated-images, toprated-images, random-images
+  * popular_images, latest_images, latest_date_images, latest_mtime_images, latest_publishdate_images, mostrated_images, toprated_images, random_images
 
 Supports the following parameters:
 * `count` The number of albums or images to return.  Defaults to 1.
@@ -92,13 +92,13 @@ Supports the following parameters:
 * `deep` This only applies when getting albums, not the overall gallery.  When `true` the stats will be measured across all descendant albums.  Otherwise it will only measure the stats on the specific named album: image stats will only include images in the album and album stats will only include immedate child albums.  Defaults to false.
 
 Examples:
-* `http://mysite.com/?json&latest-albums=count:3` get the 3 latest albums
-* `http://mysite.com/?json&popular-albums=threshold:2` get the most popular subalbum, must have at least 2 views
-* `http://mysite.com/?json&latest-albums=sort:asc` get the oldest album in the gallery
-* `http://mysite.com/myAlbum/?json&latest-albums=deep:true` get the newest album at any depth under myAlbum
+* `http://mysite.com/?json&latest_albums=count:3` get the 3 latest albums
+* `http://mysite.com/?json&popular_albums=threshold:2` get the most popular subalbum, must have at least 2 views
+* `http://mysite.com/?json&latest_albums=sort:asc` get the oldest album in the gallery
+* `http://mysite.com/myAlbum/?json&latest_albums=deep:true` get the newest album at any depth under myAlbum
 
 Join parameters with commas:
-* `http://mysite.com/?json&popular-albums=count:3,sort:asc,threshold:2` get the 3 least popular albums that have been viewed at least twice 
+* `http://mysite.com/?json&popular_albums=count:3,sort:asc,threshold:2` get the 3 least popular albums that have been viewed at least twice 
 
 Statistics can only be collected on gallery and album requests; they cannot be collected on image and search requests.
 
