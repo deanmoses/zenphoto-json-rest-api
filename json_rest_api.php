@@ -57,7 +57,7 @@ class jsonRestApi {
 		// If the request is coming from a subdomain, send the headers
 		// that allow cross domain AJAX.  This is important when the web 
 		// front end is being served from sub.domain.com but its AJAX
-		// requests are hitting a zenphoto installation on domain.com
+		// requests are hitting a Zenphoto installation on domain.com
 
 		// Browsers send the Origin header only when making an AJAX request
 		// to a different domain than the page was served from.  Format: 
@@ -147,8 +147,6 @@ class jsonRestApi {
 			// For each top-level album
 		   	$subAlbumNames = $gallery->getAlbums(self::getCurrentPage());
 			if (is_array($subAlbumNames)) {
-				
-
 				$albums = array();
 				foreach ($subAlbumNames as $subAlbumName) {
 					$subalbum = newAlbum($subAlbumName, $gallery);
@@ -534,6 +532,7 @@ class jsonRestApi {
 	 * latest_albums=count:4,threshold:2,sort:asc,deep:true
 	 *
 	 * @param string $statParam like 'count:4,threshold:2,sort:asc,deep:true'
+	 * @throws Exception if the params are invalid.  The exception message should be returned to the client.
 	 * @return array of parsed stat parameters
 	 */
 	static function parseStatParameters($statParams) {
@@ -543,9 +542,11 @@ class jsonRestApi {
 		if ($statParams) {
 			// split something like 'count:4,threshold:2,sort:asc,deep' into individual parameters like 'count:4'
 			$params = explode(',', $statParams);
+
 			// split each individual parameter like 'count:4' into a name value pair
 			foreach ($params as $param) {
 				$pair = explode(':', $param);
+
 				if (count($pair) < 2) {
 					self::throw_qs('stat parameter is missing a colon', $param);
 				}
@@ -571,13 +572,13 @@ class jsonRestApi {
 				else if ($name === 'sort') {
 					$parsedParams['sort'] = sanitize($value);
 					if (!in_array($parsedParams['sort'], array('asc','desc'))) {
-						self::throw_qs('stat parameter is not "asc" or "desc"', $param);
+						self::throw_qs('stat parameter "sort" is not "asc" or "desc"', $param);
 					}
 				}
 				else if ($name === 'deep') {
 					$value = sanitize($value);
 					if (!in_array($value, array('true','false'))) {
-						self::throw_qs('stat parameter is not "true" or "false"', $param);
+						self::throw_qs('stat parameter "deep" is not "true" or "false"', $param);
 					}
 					$parsedParams['deep'] = $value === 'true';
 				}
@@ -609,17 +610,6 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Get the page number of paginated results.
-	 *
-	 * @return integer page number.  0 if results should not be paginated
-	 */
-	static function getCurrentPage() {
-		global $_zp_page;
-		// pagination=off means return 0, which tells Zenphoto to get all images and subalbums
-		return isset($_GET['pagination']) && $_GET['pagination'] === 'off' ? 0 : $_zp_page;
-	}
-
-	/**
 	 * Invoke the specified obj->methodName and add it to the $ret array.
 	 * Does not add it if the method returns null or blank.
 	 * Lowercases the method name and strips off any 'get':  getCopyright becomes copyright.
@@ -636,23 +626,34 @@ class jsonRestApi {
 	}
 
 	/**
-	 * Take a zenphoto date string and turn it into an integer timestamp of 
+	 * Take a Zenphoto date string and turn it into an integer timestamp of 
 	 * seconds since the epoch.  
 	 *
-	 * Javascript uses milliseconds since the  epoch so javascript clients 
+	 * Javascript uses milliseconds since the epoch so javascript clients 
 	 * will neeed to multiply times 1000, like: new Date(1000*timestamp)
 	 *
-	 * @param string $dateString
-	 * @return integer
+	 * @param string $dateString Zenphoto date string of format 2014-11-24 01:40:22
+	 * @return int
 	 */
 	static function dateToTimestamp($dateString) {
-		$a = strptime($dateString, '%Y-%m-%d %H:%M:%S'); //format:  2014-11-24 01:40:22
+		$a = strptime($dateString, '%Y-%m-%d %H:%M:%S'); // format:  2014-11-24 01:40:22
 		return (int) mktime($a['tm_hour'], $a['tm_min'], $a['tm_sec'], $a['tm_mon']+1, $a['tm_mday'], $a['tm_year']+1900);
 	}
 
 	/**
+	 * Get the page number of paginated results.
+	 *
+	 * @return int page number.  0 if results should not be paginated
+	 */
+	static function getCurrentPage() {
+		global $_zp_page;
+		// pagination=off means return 0, which tells Zenphoto to get all images and subalbums
+		return isset($_GET['pagination']) && $_GET['pagination'] === 'off' ? 0 : $_zp_page;
+	}
+
+	/**
 	 * Get the value of the depth query string parameter, or the default depth.
-	 * @return integer
+	 * @return int
 	 */
 	static function getDepth() {
 		return (isset($_GET['depth']))
