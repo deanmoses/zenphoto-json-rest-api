@@ -103,8 +103,7 @@ class jsonRestApi {
 					if ($_zp_current_image && !$_zp_current_image->exists) {
 						$ret = self::getErrorData(404, gettext_pl('Image does not exist.', 'json_rest_api'));
 					} else {
-						$ret['album'] = self::getAlbumData($_zp_current_album, self::getDepth());
-						self::addStats($ret['album'], $_zp_current_album->getFolder());
+						$ret['album'] = self::getAlbumData($_zp_current_album, self::getDepth(), true /* true: isTopLevel */);
 					}
 					break;
 				case 'image.php':
@@ -127,6 +126,11 @@ class jsonRestApi {
 	 * Return array containing info about the gallery itself and its root albums.
 	 * 
 	 * @param obj $gallery Gallery object
+	 * @param int $depth depth to traverse into albums
+	 *			 2: get top-level albums, and thumbnails of those albums' immediate subalbums
+	 *			 1: get the thumbnails of the top-level albums (DEFAULT)
+	 *			 0: don't get any albums
+	 *			-1: get all albums (infinite depth)
 	 * @return JSON-ready array
 	 */
 	static function getGalleryData($gallery, $depth = 1) {
@@ -172,9 +176,10 @@ class jsonRestApi {
 	 *			 1: get this album and the thumbnails of subalbums (DEFAULT)
 	 *			 0: get just the thumbnail information about this album (no images or albums)
 	 *			-1: get all albums (infinite depth)
+	 * @param boolean $isTopLevel: true if this is the album explicitly requested in the URL
 	 * @return JSON-ready array
 	 */
-	static function getAlbumData($album, $depth = 1) {
+	static function getAlbumData($album, $depth = 1, $isTopLevel = false) {
 		global $_zp_current_image;
 
 		if (!$album) {
@@ -249,6 +254,10 @@ class jsonRestApi {
 			if ($prevAlbum) {
 				$ret['prev'] = $prevAlbum;
 			}
+		}
+
+		if ($isTopLevel) {
+			self::addStats($ret, $album->getFolder());
 		}
 
 		return $ret;
@@ -339,23 +348,18 @@ class jsonRestApi {
 	/**
 	 * Return array with error information
 	 * 
-	 * @param string $error_message
+	 * @param int $errorCode numeric HTTP error code like 404
+	 * @param string $errorMessage message to return to the client
 	 * @return JSON-ready array
 	 */
-	static function getErrorData($errorcode, $error_message = '') {
+	static function getErrorData($errorCode, $errorMessage = '') {
 		$ret = array();
-		switch($errorcode) {
-			case 403:
-				http_response_code(403);
-				$ret['status'] = 403;
-				break;
-			case 404:
-				http_response_code(404);
-				$ret['status'] = 404;
-				break;
-		}
+
+		http_response_code($errorCode);
 		$ret['error'] = true;
-		$ret['message'] = $error_message;
+		$ret['status'] = $errorCode;
+		if ($errorMessage) $ret['message'] = $errorMessage;
+
 		return $ret;
 	}
 
