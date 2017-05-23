@@ -33,15 +33,9 @@ By default, results are paginated in the normal Zenphoto pattern.  Get subsequen
 * `http://mysite.com/myAlbum/page/2/?json` get JSON about myAlbum and the second page of its immediate child albums
 * `http://mysite.com/page/search/train/page/2/?json` get JSON about the second page of search results about 'train'
 
-Use "`pagination=off`" to return the full unpaginated set of results.
-
-Albums:
+Use "`pagination=off`" to return the full unpaginated set of results:
 * `http://mysite.com/myAlbum/?json&pagination=off` get myAlbum and all its descendants, unpaginated
-
-Search:
 * `http://mysite.com/page/search/train/?json&pagination=off` get search results about 'train', unpaginated
-
-The gallery itself:
 * `http://mysite.com/?json&pagination=off` get info about the gallery itself and the top-level albums, unpaginated
 
 `pagination` has no effect on images.
