@@ -370,18 +370,38 @@ class jsonRestApi {
 	 * @param string $albumFolder optional name of an album to only get the stats for its direct subalbums
 	 */
 	static function addStats(&$ret, $albumFolder = null) {
-		try {
-			$albumStats = self::getAlbumStats($albumFolder);
-			if ($albumStats) {
-				$ret['stats']['album'] = $albumStats;
+		if (self::isAStatRequested()) {
+			try {
+				if (!self::isStatsPluginEnabled()) {
+					throw new Exception(gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName);
+				}
+
+				$albumStats = self::getAlbumStats($albumFolder);
+				if ($albumStats) {
+					$ret['stats']['album'] = $albumStats;
+				}
+				$imageStats = self::getImageStats($albumFolder);
+				if ($imageStats) {
+					$ret['stats']['image'] = $imageStats;
+				}
+			} catch(Exception $e) {
+				$ret['stats']['error'] = $e->getMessage();
 			}
-			$imageStats = self::getImageStats($albumFolder);
-			if ($imageStats) {
-				$ret['stats']['image'] = $imageStats;
-			}
-		} catch(Exception $e) {
-			$ret['stats']['error'] = $e->getMessage();
 		}
+	}
+
+	/**
+	 * Return true if the URL contains one of the stat query string parameters.
+	 * 
+	 * @return boolean
+	 */
+	static function isAStatRequested() {
+		foreach ($_GET as $param => $value) {
+			if (self::endsWith($param, '_albums') || self::endsWith($param, '_images')) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -397,10 +417,6 @@ class jsonRestApi {
 		foreach (self::$albumStatTypes as $statType) {
 			$statTypeQueryParam = $statType . '_albums';
 			if (isset($_GET[$statTypeQueryParam])) {
-				if (!self::isStatsPluginEnabled()) {
-					throw new Exception(gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName);
-				}
-
 				$statParams = self::parseStatParameters($_GET[$statTypeQueryParam]);
 
 				$ret[$statType] = self::getAlbumStatData(
@@ -462,10 +478,6 @@ class jsonRestApi {
 		foreach (self::$imageStatTypes as $statType) {
 			$statTypeQueryParam = $statType . '_images';
 			if (isset($_GET[$statTypeQueryParam])) {
-				if (!self::isStatsPluginEnabled()) {
-					throw new Exception(gettext_pl('Plugin not enabled:  ', 'json_rest_api') . self::$statsPluginName);
-				}
-
 				$statParams = self::parseStatParameters($_GET[$statTypeQueryParam]);
 
 				$ret[$statType] = self::getImageStatData(
@@ -642,6 +654,17 @@ class jsonRestApi {
 	static function dateToTimestamp($dateString) {
 		$a = strptime($dateString, '%Y-%m-%d %H:%M:%S'); // format:  2014-11-24 01:40:22
 		return (int) mktime($a['tm_hour'], $a['tm_min'], $a['tm_sec'], $a['tm_mon']+1, $a['tm_mday'], $a['tm_year']+1900);
+	}
+
+	/**
+	 * String endsWith() function.
+	 *
+	 * @param string $str haystack
+	 * @param string $sub needle
+	 * @return boolean
+	 */
+	static function endsWith($str, $sub) {
+	   return ( substr( $str, strlen( $str ) - strlen( $sub ) ) === $sub );
 	}
 
 	/**
