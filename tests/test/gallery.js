@@ -166,6 +166,39 @@ describe('Gallery', function() {
 		});
 
 		/**
+		 * Test a single album stat without getting any albums.
+		 *
+		 * This is mainly to compare perf between this and getting stats WITH getting the full gallery.
+		 */
+		suite = new ZenSuite('/?json&depth=0&popular_albums');
+		suite.do('Single album stat with depth=0', function() {
+			suite.helpers.isGallery();
+
+			it('Has popular album stats', function() {
+				var gallery = this.response.body.gallery;
+				should.exist(gallery.stats);
+				should.exist(gallery.stats.album);
+				should.exist(gallery.stats.album.popular);
+			    gallery.stats.album.popular.should.have.length.of(1);
+			});
+
+			it('Does not have any image stats', function() {
+				var gallery = this.response.body.gallery;
+				should.not.exist(gallery.stats.image);
+			});
+
+			it('Has no subalbums', function() {
+				var gallery = this.response.body.gallery;
+				should.not.exist(gallery.albums);
+			});
+
+			it('Has no images', function() {
+				var gallery = this.response.body.gallery;
+				should.not.exist(gallery.images);
+			});
+		});
+
+		/**
 		 * Test multiple album stats with non-default lengths
 		 */
 		suite = new ZenSuite('/?json&popular_albums=count:2&latest_albums=count:3');
