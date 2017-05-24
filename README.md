@@ -92,7 +92,14 @@ Examples:
 * `http://mysite.com/myAlbum/?json&latest_albums=deep:true` get the newest album at any depth under myAlbum
 
 Join parameters with commas:
-* `http://mysite.com/?json&popular_albums=count:3,sort:asc,threshold:2` get the 3 least popular albums that have been viewed at least twice 
+```
+http://mysite.com/?json&popular_albums=count:3,sort:asc,threshold:2
+```
+
+If you just want to get statistics and not get anything else, the most efficient way is to ask for the gallery with `depth=0`:
+```
+http://mysite.com/?json&depth=0&popular_albums
+```
 
 Statistics can only be collected on gallery and album requests; they cannot be collected on image and search requests.
 
