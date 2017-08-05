@@ -1,32 +1,44 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: json_rest_api\n"
-"POT-Creation-Date: 2017-04-09 11:36+0200\n"
-"PO-Revision-Date: 2017-04-09 11:37+0200\n"
+"POT-Creation-Date: 2017-04-30 15:06+0200\n"
+"PO-Revision-Date: 2017-04-30 15:07+0200\n"
 "Last-Translator: Malte Müller (acrylian) <wartgart@gmx.net>\n"
 "Language-Team: Malte Müller\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0\n"
+"X-Generator: Poedit 2.0.1\n"
 "X-Poedit-Basepath: ../../../..\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: gettext_pl\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: json_rest_api.php:14
+#: json_rest_api.php:13
 msgid "JSON REST API for Zenphoto"
 msgstr "JSON REST API für Zenphoto"
 
-#: json_rest_api.php:82
+#: json_rest_api.php:16
+msgid "zenphoto-json-rest-api requires PHP 5.4 or greater."
+msgstr "zenphoto-json-rest-api erfordert PHP 5.4 oder neuer."
+
+#: json_rest_api.php:97
+msgid "Album does not exist."
+msgstr "Album existiert nicht."
+
+#: json_rest_api.php:104
 msgid "Image does not exist."
 msgstr "Bild existiert nicht."
 
-#: json_rest_api.php:91
-msgid "Album does not exist."
-msgstr "Album existiert nicht."
+#: json_rest_api.php:117 json_rest_api.php:178 json_rest_api.php:262
+msgid "Access forbidden."
+msgstr "Zugriff verweigert."
+
+#: json_rest_api.php:462
+msgid "Plugin not enabled:  "
+msgstr "Plugin nicht aktiviert: "
 
 #~ msgid "A plugin to add a cookie notify dialog to comply with the EU cookie law and Google's request regarding usages of Google Adwords, Analytics and more"
 #~ msgstr "Ein Plugin für einen Cookie-Hinweis-Dialog, um dem EU Cookie-Gesetz und Googles Anforderung bezüglich der Verwendung von Google Adwords, Analytics und mehr zu entsprechen."
