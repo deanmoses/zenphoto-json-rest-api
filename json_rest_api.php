@@ -96,7 +96,7 @@ class jsonRestApi {
 					if ($_zp_current_album && !$_zp_current_album->exists) {
 						$ret = self::getErrorData(404, gettext_pl('Album does not exist.', 'json_rest_api'));
 					} else {
-						$ret['gallery'] = self::getGalleryData($_zp_gallery, self::getDepth());
+						$ret['album'] = self::getGalleryData($_zp_gallery, self::getDepth());
 					}
 					break;
 				case 'album.php':
@@ -140,6 +140,7 @@ class jsonRestApi {
 		self::add($ret, $gallery, 'getTitle');
 		self::add($ret, $gallery, 'getDesc');
 
+		$ret['path'] = '';
 		$ret['image_size'] = (int) getOption('image_size');
 		$ret['thumb_size'] = (int) getOption('thumb_size');
 
