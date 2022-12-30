@@ -204,7 +204,7 @@ class jsonRestApi {
 			$ret['date_updated'] = self::dateToTimestamp($album->getUpdatedDate());
 		}
 		self::add($ret, $album, 'getCustomData');
-		if (!(boolean) $album->getShow()) $ret['unpublished'] = true;
+		if (!(boolean) $album->isPublished()) $ret['unpublished'] = true;
 		$ret['image_size'] = (int) getOption('image_size');
 		$ret['thumb_size'] = (int) getOption('thumb_size');
 		
@@ -231,7 +231,7 @@ class jsonRestApi {
 			// Add info about this albums' images
 			$images = array();
 			foreach ($album->getImages(self::getCurrentPage()) as $filename) {
-				$image = newImage($album, $filename);
+				$image = Image::newImage($album, $filename);
 				$images[] = self::getImageData($image);
 			}
 			if ($images) {
@@ -258,7 +258,7 @@ class jsonRestApi {
 		}
 
 		if ($isTopLevel) {
-			self::addStats($ret, $album->getFolder());
+			self::addStats($ret, $album->getName());
 		}
 
 		return $ret;
@@ -283,7 +283,7 @@ class jsonRestApi {
 		// the data structure we will be returning
 		$ret = array();
 
-		$ret['path'] = $path = $image->getAlbumName() . '/' . $image->getFileName();
+		$ret['path'] = $path = $image->getAlbumName() . '/' . $image->getName();
 		self::add($ret, $image, 'getTitle');
 		self::add($ret, $image, 'getDesc');
 		$ret['date'] = self::dateToTimestamp($image->getDateTime());
